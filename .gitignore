@@ -1,0 +1,28 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.env/
+
+# Logs
+*.log
+
+# Data dumps
+*.csv
+*.xlsx
+*.parquet
+
+# dbt artifacts
+target/
+dbt_packages/
+dbt_modules/
+
+# IDE/editor files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
