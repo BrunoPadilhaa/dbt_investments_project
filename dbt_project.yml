@@ -1,0 +1,19 @@
+name: 'INVESTMENTS'
+version: '1.0.0'
+config-version: 2
+
+profile: 'INVESTMENTS'
+
+models:
+  INVESTMENTS:
+    staging:
+      +schema: STAGING
+      +materialized: view
+    marts:
+      +schema: MARTS
+      +materialized: table
+
+seeds:
+  INVESTMENTS:
+    ticker_map:
+      schema: RAW
