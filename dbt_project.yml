@@ -4,16 +4,17 @@ config-version: 2
 
 profile: 'INVESTMENTS'
 
+# Model configuration
 models:
-  INVESTMENTS:
+  INVESTMENTS:                 # matches your root folder
     staging:
-      +schema: STAGING
-      +materialized: view
+      +schema: STAGING       # absolute schema name; avoids RAW_STAGING
+      +materialized: table
     marts:
-      +schema: MARTS
+      +schema: MARTS        # absolute schema name for marts
       +materialized: table
 
+# Seeds configuration
 seeds:
   INVESTMENTS:
-    ticker_map:
-      schema: RAW
+    +schema: RAW               # seeds go to RAW schema
