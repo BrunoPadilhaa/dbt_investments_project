@@ -75,8 +75,12 @@ for root, dirs, files in os.walk(file_path):
 # --- Combine and upload to Snowflake ---
 if all_dfs:
     combined_df = pd.concat(all_dfs, ignore_index=True)
-    print("Rows to load:", combined_df.shape[0])
-    print("Columns before upload:", combined_df.columns.tolist())
+    print("Rows before dedup:", combined_df.shape[0])
+    
+    # Remove duplicates by ID, keep first occurrence
+    combined_df = combined_df.drop_duplicates(subset=['ID'], keep='first')
+    
+    print("Rows after dedup:", combined_df.shape[0])
     
     success, nchunks, nrows, _ = write_pandas(
         conn=ctx,
