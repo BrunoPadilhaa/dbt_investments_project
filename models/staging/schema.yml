@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: stg_trades_pt
+    description: "Cleaned Portuguese trades data"
+    columns:
+      - name: trade_id
+        description: "Unique identifier for each trade"
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_stock_prices
+    description: "Cleaned daily stock prices"
+    columns:
+    - name: symbol
+      description: "Stock ticker symbol"
+      tests:
+        - not_null
+    - name: price_date
+      description: "Date of the stock price"
+      tests:
+        - not_null
+    tests:  # Move this to model level (same as stg_exchange_rates)
+    - dbt_utils.unique_combination_of_columns:
+        arguments:
+          combination_of_columns:
+            - symbol
+            - price_date
+
+  - name: stg_exchange_rates
+    description: "Cleaned daily exchange rates"
+    columns:
+      - name: currency_from
+        description: "Base currency being converted from"
+        tests:
+          - not_null
+      - name: currency_to
+        description: "Target currency being converted to"
+        tests:
+          - not_null
+      - name: rate_date
+        description: "Date of the exchange rate"
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - currency_from
+              - currency_to
+              - rate_date
+
+
+
+  - name: stg_stock_info
+    description: "Cleaned stock information"
+    columns:
+      - name: symbol
+        description: "symbol for the stock"
+        tests:
+          - not_null
+
+          

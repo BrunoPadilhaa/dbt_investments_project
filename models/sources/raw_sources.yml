@@ -1,0 +1,34 @@
+version: 2
+
+sources:
+  - name: raw 
+    database: INVESTMENTS
+    schema: RAW
+    tables:
+      - name: raw_trades_pt
+        identifier: RAW_TRADES_PT
+        description: "Raw trades from XTB"
+        freshness:
+          warn_after: {count: 35, period: day}
+          error_after: {count: 45, period: day}
+        loaded_at_field: LOAD_TS
+
+      - name: raw_stock_prices
+        identifier: RAW_STOCK_PRICES
+        description: "Daily stock prices from Yahoo Finance"
+        freshness:
+          warn_after: {count: 1, period: day}
+          error_after: {count: 2, period: day}
+        loaded_at_field: LOAD_TS
+
+      - name: raw_stock_info
+        identifier: RAW_STOCK_INFO
+        description: "Stock descriptive information such as field, area of business..."
+
+      - name: raw_exchange_rates
+        identifier: RAW_EXCHANGE_RATES
+        description: "Daily exchange rates for USD, BRL and GBP to EUR"
+        freshness:
+          warn_after: {count: 1, period: day}
+          error_after: {count: 2, period: day}
+        loaded_at_field: LOAD_TS
