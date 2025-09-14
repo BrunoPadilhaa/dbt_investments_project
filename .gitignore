@@ -1,0 +1,13 @@
+# dbt artifacts
+target/
+logs/
+dbt_packages/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# VSCode / IDEs
+.vscode/
+.idea/
