@@ -1,0 +1,27 @@
+version: 2
+
+sources:
+  - name: staging
+    description: "Staging layer data sources"
+    database: INVESTMENTS
+    schema: STAGING
+    tables:
+      - name: stg_stock_info
+        identifier: stg_stock_info
+        description: "Information about the stocks"
+        columns: 
+          - name: symbol
+            description: "Contains unique ids for each stock"
+            tests:
+              - not_null
+              - unique
+    
+      - name: stg_stock_country_mapping
+        identifier: STG_STOCK_COUNTRY_MAPPING
+        description: "Stock countries"
+        columns: 
+          - name: symbol
+            description: "Contains unique symbols for each stock"
+            tests:
+              - not_null
+              - unique
