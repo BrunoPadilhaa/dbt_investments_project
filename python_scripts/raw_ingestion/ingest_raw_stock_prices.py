@@ -59,7 +59,8 @@ def fetch_stock_data(stocks, start_date, end_date):
         try:
             logger.info(f"Fetching {stock} -> {yf_symbol}")
             ticker = yf.Ticker(yf_symbol)
-            data = ticker.history(start=start_date, end=end_date)
+            # Force daily interval and keep Close and Adj Close
+            data = ticker.history(start=start_date, end=end_date, interval="1d", auto_adjust=False)
 
             if data.empty:
                 logger.warning(f"No data for {stock}")
@@ -74,8 +75,9 @@ def fetch_stock_data(stocks, start_date, end_date):
                     "PRICE_HIGH": round(row["High"], 2),
                     "PRICE_LOW": round(row["Low"], 2),
                     "PRICE_CLOSE": round(row["Close"], 2),
+                    "PRICE_ADJ_CLOSE": round(row["Adj Close"], 2) if "Adj Close" in row else None,
                     "PRICE_VOLUME": int(row["Volume"]),
-                    "SOURCE_SYSTEM": "yahoo"  # explicit for RAW contract
+                    "SOURCE_SYSTEM": "yahoo"
                 }
                 all_data.append(record)
 

@@ -61,4 +61,12 @@ models:
         tests:
           - not_null
 
+  - name: stg_stock_country_mapping
+    description: "Cleaned symbol mapping country"
+    columns:
+      - name: symbol
+        description: "symbol for the stock"
+        tests:
+          - not_null
+          - unique
           

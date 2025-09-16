@@ -32,3 +32,11 @@ sources:
           warn_after: {count: 1, period: day}
           error_after: {count: 2, period: day}
         loaded_at_field: LOAD_TS
+
+      - name: raw_stock_country_mapping
+        identifier: RAW_STOCK_COUNTRY_MAPPING
+        description: "Mapping from which countries/continents the symbol comes from"
+        freshness:
+          warn_after: {count: 1, period: day}
+          error_after: {count: 2, period: day}
+        loaded_at_field: LOAD_TS

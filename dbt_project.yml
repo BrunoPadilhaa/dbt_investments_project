@@ -8,10 +8,10 @@ profile: 'INVESTMENTS'
 models:
   INVESTMENTS:                 # matches your root folder
     staging:
-      +schema: STAGING       # absolute schema name; avoids RAW_STAGING
+      +schema: STAGING       # absolute schema name;
       +materialized: table
     marts:
-      +schema: MARTS        # absolute schema name for marts
+      +schema: PROD        # absolute schema name for prod
       +materialized: table
 
 # Seeds configuration
