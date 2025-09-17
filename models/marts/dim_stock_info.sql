@@ -13,7 +13,7 @@ WITH CTE_STOCK_COUNTRY AS (
         END AS TYPE,
         STIN.SECTOR,
         STIN.INDUSTRY,
-        STIN.CURRENCY,
+        CURR.CURRENCY_ID,
         STIN.EXCHANGE,
         SCMA.COUNTRY_NAME,
         SCMA.CONTINENT,
@@ -25,6 +25,8 @@ WITH CTE_STOCK_COUNTRY AS (
     FROM {{ ref('stg_stock_info') }} STIN
     LEFT JOIN {{ ref('stg_stock_country_mapping') }} SCMA
         ON SCMA.SYMBOL = STIN.SYMBOL
+    LEFT JOIN {{ref('dim_currency')}} CURR
+        ON CURR.CURRENCY = STIN.CURRENCY
 )
 
 SELECT * FROM CTE_STOCK_COUNTRY

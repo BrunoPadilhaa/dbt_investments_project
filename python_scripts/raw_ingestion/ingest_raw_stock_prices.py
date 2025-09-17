@@ -77,7 +77,7 @@ def fetch_stock_data(stocks, start_date, end_date):
                     "PRICE_CLOSE": round(row["Close"], 2),
                     "PRICE_ADJ_CLOSE": round(row["Adj Close"], 2) if "Adj Close" in row else None,
                     "PRICE_VOLUME": int(row["Volume"]),
-                    "SOURCE_SYSTEM": "yahoo"
+                    "SOURCE_SYSTEM": "yahoo_finance"
                 }
                 all_data.append(record)
 

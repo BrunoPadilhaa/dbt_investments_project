@@ -80,7 +80,7 @@ for stock in symbols:
             "CURRENCY": info.get("currency"),
             "EXCHANGE": info.get("exchange"),
             "INFO_FETCH_DATE": datetime.now().date(),
-            "SOURCE_SYSTEM": "yahoo"  # explicit for RAW contract
+            "SOURCE_SYSTEM": "yahoo_finance"  # explicit for RAW contract
         }
 
         all_data.append(record)
