@@ -1,0 +1,11 @@
+version: 2
+
+models:
+- name: dim_stock_info
+  description: "Information about the stocks"
+  columns: 
+    - name: symbol
+      description: "Contains unique ids for each stock"
+      tests:
+      - not_null
+      - unique

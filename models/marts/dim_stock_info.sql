@@ -22,8 +22,8 @@ WITH CTE_STOCK_COUNTRY AS (
         STIN.LOAD_TS,
         CURRENT_TIMESTAMP() AS DBT_CREATED_AT,
         CURRENT_TIMESTAMP() AS DBT_UPDATED_AT
-    FROM {{ source('staging', 'stg_stock_info') }} STIN
-    LEFT JOIN {{ source('staging', 'stg_stock_country_mapping') }} SCMA
+    FROM {{ ref('stg_stock_info') }} STIN
+    LEFT JOIN {{ ref('stg_stock_country_mapping') }} SCMA
         ON SCMA.SYMBOL = STIN.SYMBOL
 )
 
