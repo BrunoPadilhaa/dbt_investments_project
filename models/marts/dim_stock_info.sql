@@ -1,3 +1,11 @@
+{{
+    config(
+            materialized = 'incremental',
+            unique_key = 'STOCK_ID',
+                incremental_strategy = 'merge'
+          )
+}}
+
 WITH CTE_STOCK_COUNTRY AS (
     SELECT
         ROW_NUMBER() OVER (ORDER BY STIN.SYMBOL) AS STOCK_ID,
@@ -20,7 +28,6 @@ WITH CTE_STOCK_COUNTRY AS (
         STIN.INFO_FETCH_DATE,
         STIN.SOURCE_SYSTEM,
         STIN.LOAD_TS,
-        CURRENT_TIMESTAMP() AS DBT_CREATED_AT,
         CURRENT_TIMESTAMP() AS DBT_UPDATED_AT
     FROM {{ ref('stg_stock_info') }} STIN
     LEFT JOIN {{ ref('stg_stock_country_mapping') }} SCMA

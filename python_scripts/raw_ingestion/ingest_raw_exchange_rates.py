@@ -72,7 +72,7 @@ for from_cur, to_cur, yf_ticker in currency_pairs:
                 "CURRENCY_TO": to_cur,
                 "RATE_DATE": rate_date,
                 "EXCHANGE_RATE": round(1 / row["Close"], 6),  # invert for from -> to
-                "SOURCE_SYSTEM": "yahoo_finance"
+                "SOURCE_SYSTEM": "yahoo finance"
             }
             all_data.append(record)
 
