@@ -1,14 +1,14 @@
 {{
     config(
         materialized = 'incremental'
-    ,   unique_key = ['SYMBOL','PRICE_DATE']
+    ,   unique_key = ['STOCK_SYMBOL','PRICE_DATE']
     ,   on_schema_change = 'fail'
     )
 }}
 
 WITH stock_prices AS (
 SELECT 
-    SYMBOL
+    STOCK_SYMBOL
 ,   CAST(PRICE_DATE AS DATE) AS PRICE_DATE
 ,   CAST(PRICE_OPEN AS NUMBER(10,2)) AS PRICE_OPEN
 ,   CAST(PRICE_HIGH AS NUMBER(10,2)) AS PRICE_HIGH
@@ -22,7 +22,7 @@ FROM {{source('raw','raw_stock_prices')}}
 
 {% if is_incremental() %}
 
-    WHERE LOAD_TS > (SELECT MAX(LOAD_TS) FROM {{this}})
+    WHERE LOAD_TS > COALESCE((SELECT MAX(LOAD_TS) FROM {{this}}),'1900-01-01 00:00:00')
 
 {% endif %}
 

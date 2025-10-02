@@ -20,7 +20,7 @@ FROM {{source('raw','raw_exchange_rates')}}
 
 {% if is_incremental() %}
 
-    WHERE LOAD_TS > (SELECT MAX(LOAD_TS) FROM {{this}})
+    WHERE LOAD_TS > COALESCE((SELECT MAX(LOAD_TS) FROM {{this}}), '1900-01-01 00:00:00')
 
 {% endif %}
 

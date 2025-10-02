@@ -1,14 +1,14 @@
 {{
     config(
         materialized = 'incremental'
-    ,   unique_key = 'symbol'
+    ,   unique_key = 'stock_symbol'
     ,   incremental_strategy = 'merge'
     )
 }}
 
 WITH cte_stock_country AS (
 SELECT
-    SYMBOL,
+    STOCK_SYMBOL,
     SUFFIX,
     YF_SUFFIX,
     COUNTRY_NAME,
