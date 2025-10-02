@@ -13,7 +13,7 @@ models:
   - name: stg_stock_prices
     description: "Cleaned daily stock prices"
     columns:
-      - name: symbol
+      - name: ticker
         description: "Stock ticker symbol"
         tests:
           - not_null
@@ -24,7 +24,7 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:
-            - symbol
+            - ticker
             - price_date
 
   - name: stg_exchange_rates
@@ -49,19 +49,19 @@ models:
             - currency_to
             - rate_date
 
-  - name: stg_stock_info
+  - name: stg_ticker
     description: "Cleaned stock information"
     columns:
-      - name: symbol
+      - name: ticker
         description: "Symbol for the stock"
         tests:
           - not_null
 
   - name: stg_stock_country_mapping
-    description: "Cleaned symbol mapping country"
+    description: "Cleaned tickers mapping country"
     columns:
-      - name: symbol
-        description: "Symbol for the stock"
+      - name: ticker
+        description: "Tickers for the stock"
         tests:
           - not_null
           - unique

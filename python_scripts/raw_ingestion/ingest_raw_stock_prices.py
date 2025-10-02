@@ -15,7 +15,7 @@ DATABASE = 'INVESTMENTS'
 SCHEMA = 'RAW'
 RAW_TRADES_TABLE = 'RAW_TRADES_PT'
 RAW_STOCK_PRICES_TABLE = 'RAW_STOCK_PRICES'
-RAW_TICKER_MAP_TABLE = 'RAW_SYMBOL_MAPPING'  # dbt seed
+RAW_TICKER_MAP_TABLE = 'RAW_STOCK_COUNTRY_MAPPING'  # dbt seed
 
 ctx = snowflake.connector.connect(
     user=USER,
@@ -47,7 +47,7 @@ existing_rows = cs.fetchall()
 existing_set = set((row[0], row[1]) for row in existing_rows)
 
 # --- Load ticker mapping from dbt seed ---
-ticker_map_df = pd.read_sql(f"SELECT SYMBOL, YF_SYMBOL FROM {SCHEMA}.{RAW_TICKER_MAP_TABLE}", ctx)
+ticker_map_df = pd.read_sql(f"SELECT SYMBOL, CASE WHEN YF_SUFFIX IS NOT NULL AND YF_SUFFIX != '' THEN SPLIT_PART(SYMBOL, '.', 1) || '.' || YF_SUFFIX ELSE SPLIT_PART(SYMBOL, '.', 1) END AS YF_SYMBOL FROM {SCHEMA}.{RAW_TICKER_MAP_TABLE}", ctx)
 ticker_mapping = dict(zip(ticker_map_df["SYMBOL"], ticker_map_df["YF_SYMBOL"]))
 logger.info(f"Loaded {len(ticker_mapping)} ticker mappings from {RAW_TICKER_MAP_TABLE}")
 

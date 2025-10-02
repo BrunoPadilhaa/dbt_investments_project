@@ -1,22 +1,22 @@
 {{
     config(
-            materialized = 'incremental',
-            unique_key = 'STOCK_ID',
-                incremental_strategy = 'merge'
-          )
+        materialized='incremental',
+        unique_key='TICKER_ID',
+        incremental_strategy='merge'
+    )
 }}
 
 WITH CTE_STOCK_COUNTRY AS (
     SELECT
-        ROW_NUMBER() OVER (ORDER BY STIN.SYMBOL) AS STOCK_ID,
-        SPLIT_PART(STIN.SYMBOL, '.', 1) AS SYMBOL,
-        STIN.SYMBOL AS ORIGINAL_SYMBOL,
+        ABS(HASH(STIN.TICKER, STIN.SOURCE_SYSTEM)) AS TICKER_ID,
+        SPLIT_PART(STIN.TICKER, '.', 1) AS TICKER,
+        STIN.TICKER AS ORIGINAL_TICKER,
         STIN.LONGNAME AS NAME,
         STIN.QUOTETYPE,
         CASE
             WHEN STIN.SECTOR = 'Real Estate' THEN 'REIT'
             WHEN STIN.QUOTETYPE = 'EQUITY' THEN 'STOCKS'
-            WHEN STIN.QUOTETYPE = 'ETF' THEN QUOTETYPE
+            WHEN STIN.QUOTETYPE = 'ETF' THEN STIN.QUOTETYPE
             ELSE 'OTHERS'
         END AS TYPE,
         STIN.SECTOR,
@@ -28,11 +28,14 @@ WITH CTE_STOCK_COUNTRY AS (
         STIN.INFO_FETCH_DATE,
         STIN.SOURCE_SYSTEM,
         STIN.LOAD_TS,
-        CURRENT_TIMESTAMP() AS DBT_UPDATED_AT
-    FROM {{ ref('stg_stock_info') }} STIN
+        CURRENT_TIMESTAMP()::TIMESTAMP_NTZ AS DBT_UPDATED_AT
+    FROM {{ ref('stg_ticker') }} STIN
+    {% if is_incremental() %}
+        WHERE STIN.LOAD_TS > (SELECT COALESCE(MAX(LOAD_TS), '1900-01-01'::TIMESTAMP_NTZ) FROM {{ this }})
+    {% endif %}
     LEFT JOIN {{ ref('stg_stock_country_mapping') }} SCMA
-        ON SCMA.SYMBOL = STIN.SYMBOL
-    LEFT JOIN {{ref('dim_currency')}} CURR
+        ON SCMA.TICKER = STIN.TICKER
+    LEFT JOIN {{ ref('dim_currency') }} CURR
         ON CURR.CURRENCY = STIN.CURRENCY
 )
 

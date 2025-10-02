@@ -26,7 +26,7 @@ ctx = snowflake.connector.connect(
 
 # --- Fetch distinct symbols from raw_trades ---
 df_symbols = pd.read_sql(
-    f"SELECT DISTINCT SYMBOL FROM {SCHEMA}.{RAW_TRADES_TABLE} WHERE TRADE_TYPE = 'Stock purchase'",
+    f"SELECT DISTINCT SYMBOL FROM {SCHEMA}.{RAW_TRADES_TABLE} WHERE TYPE = 'Stock purchase'",
     ctx
 )
 

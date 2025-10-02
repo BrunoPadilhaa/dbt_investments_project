@@ -1,10 +1,10 @@
 version: 2
 
 models:
-- name: dim_stock_info
+- name: dim_ticker
   description: "Information about the stocks"
   columns: 
-    - name: stock_id
+    - name: ticker_id
       description: "Contains unique ids for each stock"
       tests:
       - not_null

@@ -21,8 +21,8 @@ sources:
           error_after: {count: 2, period: day}
         loaded_at_field: LOAD_TS
 
-      - name: raw_stock_info
-        identifier: RAW_STOCK_INFO
+      - name: raw_symbol
+        identifier: RAW_SYMBOL
         description: "Stock descriptive information such as field, area of business..."
 
       - name: raw_exchange_rates
