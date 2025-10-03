@@ -27,3 +27,13 @@ models:
       tests:
       - not_null
       - unique
+
+- name: fct_trades
+  description: "Information about trades"
+  columns: 
+    - name: trade_id
+      description: "Contains unique ids for each currency"
+      tests:
+      - not_null
+      - unique
+

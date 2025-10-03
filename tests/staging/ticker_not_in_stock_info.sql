@@ -1,5 +1,5 @@
 SELECT
-    SYMBOL
+    TICKER
 FROM {{ref('stg_trades_pt')}}
 WHERE TRADE_TYPE IN ('Stock purchase','Stock sale')
 EXCEPT
