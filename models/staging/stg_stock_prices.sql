@@ -1,14 +1,14 @@
 {{
     config(
         materialized = 'incremental'
-    ,   unique_key = ['SYMBOL','PRICE_DATE']
+    ,   unique_key = ['TICKER','PRICE_DATE']
     ,   on_schema_change = 'fail'
     )
 }}
 
 WITH stock_prices AS (
 SELECT 
-    SYMBOL
+    SYMBOL AS TICKER
 ,   CAST(PRICE_DATE AS DATE) AS PRICE_DATE
 ,   CAST(PRICE_OPEN AS NUMBER(10,2)) AS PRICE_OPEN
 ,   CAST(PRICE_HIGH AS NUMBER(10,2)) AS PRICE_HIGH
