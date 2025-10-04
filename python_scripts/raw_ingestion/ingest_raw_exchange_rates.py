@@ -29,17 +29,34 @@ cs = ctx.cursor()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-# --- Fetch last loaded price date ---
-cs.execute(f"SELECT COALESCE(MAX(RATE_DATE), TO_DATE('2025-01-01')) FROM {SCHEMA}.{RAW_EXCHANGE_TABLE}")
-max_date = cs.fetchone()[0]
-logger.info(f"Fetching exchange rates starting from: {max_date + timedelta(days=1)}")
+# --- Fetch last loaded date ---
+cs.execute(f"SELECT MAX(RATE_DATE) FROM {SCHEMA}.{RAW_EXCHANGE_TABLE}")
+max_date_result = cs.fetchone()[0]
+
+# If table is empty, start from beginning of year
+if max_date_result is None:
+    start_date = datetime(2025, 1, 1).date()
+    logger.info("Table is empty. Fetching from 2025-01-01")
+else:
+    # Start from day AFTER last loaded date
+    start_date = max_date_result + timedelta(days=1)
+    logger.info(f"Last loaded date: {max_date_result}. Fetching from: {start_date}")
+
+end_date = datetime.now().date()
+logger.info(f"Date range: {start_date} to {end_date}")
 
 # --- Fetch existing currency/date pairs to avoid duplicates ---
-cs.execute(f"SELECT CURRENCY_FROM, CURRENCY_TO, RATE_DATE FROM {SCHEMA}.{RAW_EXCHANGE_TABLE} WHERE RATE_DATE >= %s", (max_date,))
-existing_rows = cs.fetchall()
-existing_set = set((row[0], row[1], row[2]) for row in existing_rows)
+if max_date_result:
+    cs.execute(
+        f"SELECT CURRENCY_FROM, CURRENCY_TO, RATE_DATE FROM {SCHEMA}.{RAW_EXCHANGE_TABLE} WHERE RATE_DATE >= %s",
+        (start_date,)
+    )
+    existing_rows = cs.fetchall()
+    existing_set = set((row[0], row[1], row[2]) for row in existing_rows)
+else:
+    existing_set = set()
 
-# --- Currency pairs to fetch (from -> to, yf ticker) ---
+# --- Currency pairs to fetch ---
 currency_pairs = [
     ("USD", "EUR", "USDEUR=X"),
     ("BRL", "EUR", "BRLEUR=X"),
@@ -51,43 +68,52 @@ all_data = []
 
 for from_cur, to_cur, yf_ticker in currency_pairs:
     try:
-        start_date = max_date + timedelta(days=1)
-        end_date = datetime.now().date()
-
+        logger.info(f"Fetching {yf_ticker} from {start_date} to {end_date}")
         ticker = yf.Ticker(yf_ticker)
-        data = ticker.history(start=start_date, end=end_date)
-
+        
+        # Explicitly pass start and end dates
+        data = ticker.history(start=start_date, end=end_date, interval="1d")
+        
         if data.empty:
             logger.warning(f"No data for {yf_ticker}")
             continue
-
+        
+        rows_added = 0
         for date, row in data.iterrows():
             rate_date = date.date()
+            
             if (from_cur, to_cur, rate_date) in existing_set:
-                logger.info(f"Skipping existing rate for {from_cur}/{to_cur} on {rate_date}")
+                logger.debug(f"Skipping existing {from_cur}/{to_cur} on {rate_date}")
                 continue
-
+            
             record = {
                 "CURRENCY_FROM": from_cur,
                 "CURRENCY_TO": to_cur,
                 "RATE_DATE": rate_date,
-                "EXCHANGE_RATE": round(1 / row["Close"], 6),  # invert for from -> to
+                "EXCHANGE_RATE": round(1 / row["Close"], 6),
                 "SOURCE_SYSTEM": "yahoo finance"
             }
             all_data.append(record)
-
-        logger.info(f"Retrieved {len(data)} rows for {from_cur}/{to_cur}")
-
+            rows_added += 1
+        
+        logger.info(f"Retrieved {rows_added} new rows for {from_cur}/{to_cur}")
+        
     except Exception as e:
         logger.error(f"Failed fetching {yf_ticker}: {e}")
 
 # --- Load into Snowflake ---
 if all_data:
     df = pd.DataFrame(all_data)
+    df = df.reset_index(drop=True)  # Fix pandas warning
+    
     success, nchunks, nrows, _ = write_pandas(ctx, df, RAW_EXCHANGE_TABLE, schema=SCHEMA)
+    
     if success:
         logger.info(f"Loaded {nrows} rows into {SCHEMA}.{RAW_EXCHANGE_TABLE}")
     else:
         logger.error("Failed to load data into Snowflake")
 else:
     logger.warning("No new exchange rate data to load.")
+
+cs.close()
+ctx.close()
