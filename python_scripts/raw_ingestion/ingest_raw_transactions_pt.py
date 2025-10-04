@@ -11,7 +11,7 @@ WH = os.environ['SNOWFLAKE_WH']
 ACCOUNT = os.environ['SNOWFLAKE_ACCOUNT']
 DATABASE = 'INVESTMENTS'
 SCHEMA = 'RAW'
-RAW_TABLE = 'RAW_TRADES_PT'
+RAW_TABLE = 'RAW_TRANSACTIONS_PT'
 
 ctx = snowflake.connector.connect(
     user=USER,
@@ -24,7 +24,7 @@ ctx = snowflake.connector.connect(
 cs = ctx.cursor()
 
 # --- Folder containing Excel files ---
-file_path = r"C:\Users\bruno\Documents\dbt_projects\raw_trades"
+file_path = r"C:\Users\bruno\Documents\dbt_projects\dataset\international\\"
 
 # --- Fetch already loaded files from Snowflake ---
 cs.execute(f"SELECT DISTINCT source_file FROM {SCHEMA}.{RAW_TABLE}")

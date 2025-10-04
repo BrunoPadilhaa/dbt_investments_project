@@ -1,10 +1,10 @@
 version: 2
 
 models:
-  - name: stg_trades_pt
+  - name: stg_transactions_pt
     description: "Cleaned Portuguese trades data"
     columns:
-      - name: trade_id
+      - name: transaction_id
         description: "Unique identifier for each trade"
         tests:
           - unique

@@ -5,9 +5,9 @@ sources:
     database: INVESTMENTS
     schema: RAW
     tables:
-      - name: raw_trades_pt
-        identifier: RAW_TRADES_PT
-        description: "Raw trades from XTB"
+      - name: raw_transactions_pt
+        identifier: RAW_TRANSACTIONS_PT
+        description: "Raw transactions from XTB"
         freshness:
           warn_after: {count: 35, period: day}
           error_after: {count: 45, period: day}

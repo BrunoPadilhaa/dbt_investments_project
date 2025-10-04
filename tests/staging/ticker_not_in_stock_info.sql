@@ -1,7 +1,7 @@
 SELECT
     TICKER
-FROM {{ref('stg_trades_pt')}}
-WHERE TRADE_TYPE IN ('Stock purchase','Stock sale')
+FROM {{ref('stg_transactions_pt')}}
+WHERE TRANSACTION_TYPE IN ('Stock Purchase','Stock Sale')
 EXCEPT
 SELECT
     TICKER
