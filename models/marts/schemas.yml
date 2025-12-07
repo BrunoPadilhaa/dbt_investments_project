@@ -37,3 +37,12 @@ models:
       - not_null
       - unique
 
+- name: dim_date
+  description: "date dimension"
+  columns: 
+    - name: date_key
+      description: "Contains unique ids for each currency"
+      tests:
+      - not_null
+      - unique
+

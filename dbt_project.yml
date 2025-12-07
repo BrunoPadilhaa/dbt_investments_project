@@ -17,4 +17,8 @@ models:
 # Seeds configuration
 seeds:
   INVESTMENTS:
-    +schema: RAW               # seeds go to RAW schema
+    +schema: RAW
+                   # seeds go to RAW schema
+snapshots:
+   INVESTMENTS:
+    +schema: PROD
