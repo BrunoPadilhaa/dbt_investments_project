@@ -1,0 +1,8 @@
+SELECT
+    TICKER_ID
+FROM {{ref('fct_trades')}}
+WHERE TRANSACTION_TYPE_ID IN (4348687827012573508,8900044673474300801) --Stock Purchase and Stock Sale
+EXCEPT
+SELECT
+    TICKER_ID
+FROM {{ref('dim_ticker')}}

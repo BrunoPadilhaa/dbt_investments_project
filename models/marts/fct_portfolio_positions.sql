@@ -1,3 +1,7 @@
+{{ config(
+    materialized='view'
+) }}
+
 WITH dates AS (
     SELECT 
         LAST_DAY(date) AS month_end, MAX(date_key) date_key
@@ -31,11 +35,16 @@ CROSS JOIN dates d
 
 )
 
-, stock_prices AS (
+, last_day_stock_price AS (
 
+    --Gives the last stock price for each month. Then I standardize as last day of the month.
     SELECT 
-        *
-    FROM {{ref('fct_stock_prices')}}
+        ticker_id
+    ,   TO_DATE(price_date_key::STRING, 'YYYYMMDD') AS price_date
+    ,    TO_NUMBER(TO_CHAR(LAST_DAY(TO_DATE(price_date_key::STRING, 'YYYYMMDD')), 'YYYYMMDD')) AS last_day_id
+    ,   price_adj_close
+    FROM  {{ref('fct_stock_prices')}}
+    QUALIFY  ROW_NUMBER() OVER (PARTITION BY ticker_id, last_day_id ORDER BY price_date DESC) = 1
 
 )
 
