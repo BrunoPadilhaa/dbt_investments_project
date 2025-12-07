@@ -1,0 +1,8 @@
+snapshots:
+    - name: dim_ticker_t2
+      relation: ref('stg_ticker')
+      config:
+        unique_key: ticker
+        strategy: check
+        check_cols: all
+        hard_deletes: new_record

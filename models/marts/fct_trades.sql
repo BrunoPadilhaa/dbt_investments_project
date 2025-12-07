@@ -27,7 +27,7 @@ WITH transform_trades AS (
         tran.SOURCE_FILE AS SOURCE_FILE,
         tran.SOURCE_SYSTEM AS SOURCE_SYSTEM,
         tran.LOAD_TS AS LOAD_TS,
-        CURRENT_TIMESTAMP() AS DBT_UPDATED_AT
+        CURRENT_TIMESTAMP()::TIMESTAMP_NTZ AS DBT_UPDATED_AT
     FROM {{ref('stg_transactions_pt')}} tran
     LEFT JOIN {{ref('dim_ticker')}} stin
         ON stin.original_ticker = tran.ticker

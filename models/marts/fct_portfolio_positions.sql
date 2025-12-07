@@ -1,7 +1,7 @@
 WITH dates AS (
     SELECT 
         LAST_DAY(date) AS month_end, MAX(date_key) date_key
-    FROM dim_date
+    FROM {{ref('dim_date')}}
     WHERE date_key <= TO_NUMBER(TO_CHAR(CURRENT_DATE(),'YYYYMMDD')) 
     AND YEAR = 2025
     
@@ -13,7 +13,7 @@ WITH dates AS (
 SELECT DISTINCT
      ticker_id
     ,date_key
-FROM dim_ticker t
+FROM {{ref('dim_ticker')}} t
 
 CROSS JOIN dates d
 )
@@ -24,7 +24,7 @@ CROSS JOIN dates d
         TO_NUMBER(TO_CHAR(LAST_DAY(TO_DATE(TO_VARCHAR(t.transaction_date_key), 'YYYYMMDD')), 'YYYYMMDD')) AS transaction_date_key,
         SUM(t.quantity) AS quantity,
         SUM(t.amount) AS amount
-    FROM prod.fct_trades t
+    FROM {{ref('fct_trades')}} t
     GROUP BY
         t.ticker_id,
         TO_NUMBER(TO_CHAR(LAST_DAY(TO_DATE(TO_VARCHAR(t.transaction_date_key), 'YYYYMMDD')), 'YYYYMMDD'))
@@ -35,7 +35,7 @@ CROSS JOIN dates d
 
     SELECT 
         *
-    FROM fct_stock_prices
+    FROM {{ref('fct_stock_prices')}}
 
 )
 
@@ -50,7 +50,7 @@ CROSS JOIN dates d
     ,   COALESCE(SUM(fct.quantity) OVER (PARTITION BY TICKER ORDER BY DATE_KEY),0) AS QUANTITY_CUMMULATED
     FROM all_tickers alti
     
-    LEFT JOIN dim_ticker tic
+    LEFT JOIN {{ref('dim_ticker')}} tic
     ON tic.ticker_id = alti.ticker_id
     
     LEFT JOIN trades fct
