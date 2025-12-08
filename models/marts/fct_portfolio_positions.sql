@@ -25,13 +25,13 @@ CROSS JOIN dates d
 , trades AS (
     SELECT
         t.ticker_id,
-        TO_NUMBER(TO_CHAR(LAST_DAY(TO_DATE(TO_VARCHAR(t.transaction_date_key), 'YYYYMMDD')), 'YYYYMMDD')) AS transaction_date_key,
+        TO_NUMBER(TO_CHAR(LAST_DAY(TO_DATE(TO_VARCHAR(t.transaction_date_id), 'YYYYMMDD')), 'YYYYMMDD')) AS transaction_date_id,
         SUM(t.quantity) AS quantity,
         SUM(t.amount) AS amount
     FROM {{ref('fct_trades')}} t
     GROUP BY
         t.ticker_id,
-        TO_NUMBER(TO_CHAR(LAST_DAY(TO_DATE(TO_VARCHAR(t.transaction_date_key), 'YYYYMMDD')), 'YYYYMMDD'))
+        TO_NUMBER(TO_CHAR(LAST_DAY(TO_DATE(TO_VARCHAR(t.transaction_date_id), 'YYYYMMDD')), 'YYYYMMDD'))
 
 )
 
@@ -40,8 +40,8 @@ CROSS JOIN dates d
     --Gives the last stock price for each month. Then I standardize as last day of the month.
     SELECT 
         ticker_id
-    ,   TO_DATE(price_date_key::STRING, 'YYYYMMDD') AS price_date
-    ,    TO_NUMBER(TO_CHAR(LAST_DAY(TO_DATE(price_date_key::STRING, 'YYYYMMDD')), 'YYYYMMDD')) AS last_day_id
+    ,   TO_DATE(price_date_id::STRING, 'YYYYMMDD') AS price_date
+    ,    TO_NUMBER(TO_CHAR(LAST_DAY(TO_DATE(price_date_id::STRING, 'YYYYMMDD')), 'YYYYMMDD')) AS last_day_id
     ,   price_adj_close
     FROM  {{ref('fct_stock_prices')}}
     QUALIFY  ROW_NUMBER() OVER (PARTITION BY ticker_id, last_day_id ORDER BY price_date DESC) = 1
@@ -64,7 +64,7 @@ CROSS JOIN dates d
     
     LEFT JOIN trades fct
     ON fct.ticker_id = alti.ticker_id
-    AND alti.date_key = fct.transaction_date_key
+    AND alti.date_key = fct.transaction_date_id
 )
 
 
