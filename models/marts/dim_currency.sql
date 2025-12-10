@@ -1,53 +1,40 @@
-{{
-    config(
-        materialized='incremental',
-        unique_key='CURRENCY_ID'
-    )
-}}
+{{ config(
+    materialized='incremental',
+    incremental_strategy='merge',
+    unique_key='CURRENCY_ABRV',
+) }}
 
 WITH all_currencies AS (
-    SELECT 
-        CURRENCY,
-        SOURCE_SYSTEM,
-        LOAD_TS
-    FROM {{ref('stg_ticker')}}
-    {% if is_incremental() %}
-        WHERE LOAD_TS > (SELECT COALESCE(MAX(LOAD_TS), '1900-01-01'::TIMESTAMP_NTZ) FROM {{ this }})
-    {% endif %}
-    QUALIFY ROW_NUMBER() OVER (PARTITION BY CURRENCY, SOURCE_SYSTEM ORDER BY LOAD_TS DESC) = 1
+    SELECT UPPER(TRIM(CURRENCY)) AS CURRENCY_ABRV, MAX(LOAD_TS) AS LOAD_TS
+    FROM {{ ref('stg_ticker') }}
+    WHERE CURRENCY IS NOT NULL
+    GROUP BY 1
 
-    UNION
+    UNION ALL
 
-    SELECT 
-        CURRENCY_FROM AS CURRENCY,
-        SOURCE_SYSTEM,
-        LOAD_TS 
-    FROM {{ref('stg_exchange_rates')}}
-    WHERE CURRENCY_FROM NOT IN (
-        SELECT DISTINCT CURRENCY 
-        FROM {{ref('stg_ticker')}}
-    )
-    {% if is_incremental() %}
-        AND LOAD_TS > (SELECT COALESCE(MAX(LOAD_TS), '1900-01-01'::TIMESTAMP_NTZ) FROM {{ this }})
-    {% endif %}
-    QUALIFY ROW_NUMBER() OVER (PARTITION BY CURRENCY_FROM, SOURCE_SYSTEM ORDER BY LOAD_TS DESC) = 1
-)
+    SELECT UPPER(TRIM(CURRENCY_FROM)) AS CURRENCY_ABRV, MAX(LOAD_TS) AS LOAD_TS
+    FROM {{ ref('stg_exchange_rates') }}
+    WHERE CURRENCY_FROM IS NOT NULL
+    GROUP BY 1
+),
 
-, currency_final AS (
+currency_final AS (
     SELECT
-        ABS(HASH(CURRENCY, SOURCE_SYSTEM)) AS CURRENCY_ID,
-        CURRENCY,
-        CASE 
-            WHEN CURRENCY = 'USD' THEN 'US Dollar'
-            WHEN CURRENCY = 'EUR' THEN 'Euro'
-            WHEN CURRENCY = 'GBP' THEN 'British Pound'
-            WHEN CURRENCY = 'BRL' THEN 'Brazilian Real'
-            ELSE CURRENCY || ' Currency'
+       {{ dbt_utils.generate_surrogate_key(['CURRENCY_ABRV']) }} AS CURRENCY_ID,
+        CURRENCY_ABRV,
+        CASE CURRENCY_ABRV
+            WHEN 'USD' THEN 'US Dollar'
+            WHEN 'EUR' THEN 'Euro'
+            WHEN 'GBP' THEN 'British Pound'
+            WHEN 'BRL' THEN 'Brazilian Real'
+            ELSE CURRENCY_ABRV || ' Currency'
         END AS CURRENCY_NAME,
-        SOURCE_SYSTEM,
-        LOAD_TS,
-        CURRENT_TIMESTAMP()::TIMESTAMP_NTZ AS DBT_UPDATED_AT
+        MAX(LOAD_TS) AS LOAD_TS,
+        CURRENT_TIMESTAMP() AS DBT_UPDATED_AT
     FROM all_currencies
+    GROUP BY CURRENCY_ABRV
 )
 
-SELECT * FROM currency_final
+SELECT 
+    *
+FROM currency_final
