@@ -1,9 +1,8 @@
-{{
-    config(
-        materialized = 'incremental',
-        unique_key = 'TRADE_ID',
-        on_schema_change = 'fail'
-    )
+{{ 
+    config( 
+        materialized='incremental', 
+        incremental_strategy='merge', 
+        unique_key=['TRANSACTION_ID', 'SOURCE_SYSTEM'] ) 
 }}
 
 WITH transform_trades AS (
@@ -34,10 +33,6 @@ WITH transform_trades AS (
     LEFT JOIN {{ref('dim_transaction_type')}} trty
         ON trty.transaction_type = tran.transaction_type
     WHERE tran.transaction_type IN ('Stock Purchase','Stock Sale')
-
-    {% if is_incremental() %}
-        AND tran.LOAD_TS > (SELECT COALESCE(MAX(LOAD_TS),'1900-01-01'::TIMESTAMP_NTZ) FROM {{this}})
-    {% endif %}
 )
 
 , f_result AS (
@@ -62,4 +57,4 @@ WITH transform_trades AS (
     FROM transform_trades
 )
 
-SELECT * FROM f_result
+SELECT * FROM f_result 

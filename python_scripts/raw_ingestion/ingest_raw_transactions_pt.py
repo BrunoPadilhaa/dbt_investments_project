@@ -3,7 +3,6 @@ import snowflake.connector
 from snowflake.connector.pandas_tools import write_pandas
 from datetime import datetime
 import os
-
 # --- Snowflake connection info ---
 USER = os.environ['SNOWFLAKE_USER']
 PWD = os.environ['SNOWFLAKE_PWD']
@@ -12,7 +11,6 @@ ACCOUNT = os.environ['SNOWFLAKE_ACCOUNT']
 DATABASE = 'INVESTMENTS'
 SCHEMA = 'RAW'
 RAW_TABLE = 'RAW_TRANSACTIONS_PT'
-
 ctx = snowflake.connector.connect(
     user=USER,
     password=PWD,
@@ -23,19 +21,19 @@ ctx = snowflake.connector.connect(
 )
 cs = ctx.cursor()
 
+# --- TRUNCATE TABLE BEFORE LOADING ---
+print(f"Truncating table {RAW_TABLE}...")
+cs.execute(f"TRUNCATE TABLE {DATABASE}.{SCHEMA}.{RAW_TABLE}")
+print(f"Table {RAW_TABLE} truncated successfully")
+
 # --- Folder containing Excel files ---
 file_path = r"C:\Users\bruno\Documents\dbt_projects\dataset\international\\"
-
 # --- Fetch already loaded files from Snowflake ---
-cs.execute(f"SELECT DISTINCT source_file FROM {SCHEMA}.{RAW_TABLE}")
-loaded_files = set(row[0] for row in cs.fetchall())
-
 all_dfs = []
-
 # --- Walk through all subfolders and Excel files ---
 for root, dirs, files in os.walk(file_path):
     for filename in files:
-        if filename.lower().endswith(".xlsx") and filename not in loaded_files:
+        if filename.lower().endswith(".xlsx"):
             full_path = os.path.join(root, filename)
             
             # Read only the relevant sheet, skip first 10 rows, all as string
@@ -70,7 +68,6 @@ for root, dirs, files in os.walk(file_path):
                      'SYMBOL', 'AMOUNT', 'SOURCE_FILE', 'SOURCE_SYSTEM', 'LOAD_TS']]
             
             all_dfs.append(df)
-
 # --- Combine and upload to Snowflake ---
 if all_dfs:
     combined_df = pd.concat(all_dfs, ignore_index=True)
@@ -88,7 +85,6 @@ if all_dfs:
         schema=SCHEMA,
         database=DATABASE
     )
-
     if success:
         print(f"Successfully loaded {nrows} rows into {RAW_TABLE}")
         
