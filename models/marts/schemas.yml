@@ -31,8 +31,8 @@ models:
 - name: fct_trades
   description: "Information about trades"
   columns: 
-    - name: trade_id
-      description: "Contains unique ids for each currency"
+    - name: transaction_id
+      description: "Contains unique ids for each trade"
       tests:
       - not_null
       - unique
