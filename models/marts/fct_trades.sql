@@ -2,12 +2,11 @@
     config( 
         materialized='incremental', 
         incremental_strategy='merge', 
-        unique_key=['TRANSACTION_ID', 'SOURCE_SYSTEM'] ) 
+        unique_key=['TRANSACTION_ID'] ) 
 }}
 
 WITH transform_trades AS (
     SELECT
-        ABS(HASH(tran.TRANSACTION_ID, tran.SOURCE_SYSTEM)) AS TRADE_ID,
         tran.TRANSACTION_ID,
         CAST(REPLACE(CAST(tran.TRANSACTION_TIME AS DATE),'-','') AS INT) AS TRANSACTION_DATE_ID,
         trty.transaction_type_id AS TRANSACTION_TYPE_ID,
@@ -37,14 +36,13 @@ WITH transform_trades AS (
 
 , f_result AS (
     SELECT
-        TRADE_ID, 
         TRANSACTION_ID, 
         TRANSACTION_DATE_ID, 
         TRANSACTION_TYPE_ID, 
         TICKER_ID, 
         CURRENCY_ID, 
         CASE 
-            WHEN TRANSACTION_TYPE_ID = 8900044673474300801 THEN QUANTITY * -1 
+            WHEN TRANSACTION_TYPE_ID = 'f284e5640a390198e05c593e09286d01' THEN QUANTITY * -1 --sold 
             ELSE QUANTITY
         END AS QUANTITY, 
         PRICE, 
