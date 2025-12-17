@@ -40,8 +40,8 @@ models:
 - name: dim_date
   description: "date dimension"
   columns: 
-    - name: date_key
-      description: "Contains unique ids for each currency"
+    - name: date_id
+      description: "Contains unique ids for each date"
       tests:
       - not_null
       - unique
