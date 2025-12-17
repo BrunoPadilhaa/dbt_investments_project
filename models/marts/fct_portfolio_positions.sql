@@ -75,7 +75,7 @@ CROSS JOIN dates d
     ,   COALESCE(SUM(fct.quantity) OVER (PARTITION BY TICKER ORDER BY date_id),0) AS quantity_cummulated
     ,   COALESCE(SUM(fct.amount) OVER (PARTITION BY TICKER ORDER BY date_id),0) AS amount_invested_cummulated
     --  Multiply the current price times the quantity I have, after that, multiply by the euro exchange rate.
-    ,   (CAST(COALESCE(SUM(fct.quantity) OVER (PARTITION BY TICKER ORDER BY date_id),0) * eom_price AS DECIMAL(10,2))) * eom_exchange_rate AS portfolio_value 
+    ,   (CAST(COALESCE(SUM(fct.quantity) OVER (PARTITION BY TICKER ORDER BY date_id),0) * eom_price AS DECIMAL(10,2))) * COALESCE(eom_exchange_rate,1) AS portfolio_value --COALESCE(eom_exchange_rate,1) = IF NULL IS BECAUSE THE CURREENCY IS EURO, SO WE DO NOT NEED TO MULTIPLY
     FROM all_tickers alti
     
     LEFT JOIN {{ref('dim_ticker')}} tic
