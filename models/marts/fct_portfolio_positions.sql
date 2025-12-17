@@ -68,36 +68,51 @@ CROSS JOIN dates d
 , f_result AS (
 
     SELECT 
-        alti.date_id
-    ,   tic.ticker_id
-    ,   fct.quantity
-    ,   fct.amount AS amount_invested
-    ,   COALESCE(SUM(fct.quantity) OVER (PARTITION BY TICKER ORDER BY date_id),0) AS quantity_cummulated
-    ,   COALESCE(SUM(fct.amount) OVER (PARTITION BY TICKER ORDER BY date_id),0) AS amount_invested_cummulated
-    --  Multiply the current price times the quantity I have, after that, multiply by the euro exchange rate.
-    ,   (CAST(COALESCE(SUM(fct.quantity) OVER (PARTITION BY TICKER ORDER BY date_id),0) * eom_price AS DECIMAL(10,2))) * COALESCE(eom_exchange_rate,1) AS portfolio_value --COALESCE(eom_exchange_rate,1) = IF NULL IS BECAUSE THE CURREENCY IS EURO, SO WE DO NOT NEED TO MULTIPLY
-    FROM all_tickers alti
-    
-    LEFT JOIN {{ref('dim_ticker')}} tic
+    alti.date_id,
+    tic.ticker_id,
+    fct.quantity,
+    -- Current position value in EUR
+    fct.amount AS amount_invested,
+    ROUND(
+        COALESCE(fct.quantity, 0) * COALESCE(stc.eom_price, 0) * COALESCE(exr.eom_exchange_rate, 1),
+        2
+    ) AS portfolio_value,
+    -- Running totals partitioned by ticker
+    SUM(COALESCE(fct.quantity, 0)) 
+        OVER (PARTITION BY tic.ticker_id ORDER BY alti.date_id) AS quantity_cumulative,
+    SUM(COALESCE(fct.amount, 0)) 
+        OVER (PARTITION BY tic.ticker_id ORDER BY alti.date_id) AS amount_invested_cumulative,
+    -- Cumulative position value in EUR
+    ROUND(
+        SUM(COALESCE(fct.quantity, 0)) 
+            OVER (PARTITION BY tic.ticker_id ORDER BY alti.date_id) 
+        * COALESCE(stc.eom_price, 0) 
+        * COALESCE(exr.eom_exchange_rate, 1),
+        2
+    ) AS portfolio_value_cumulative
+
+FROM all_tickers alti
+
+LEFT JOIN {{ref('dim_ticker')}} tic
     ON tic.ticker_id = alti.ticker_id
-    
-    LEFT JOIN trades fct
+
+LEFT JOIN trades fct
     ON fct.ticker_id = alti.ticker_id
-    AND alti.date_id = fct.TRANSACTION_DATE_ID
+    AND fct.transaction_date_id = alti.date_id
 
-    LEFT JOIN last_day_stock_price stc
-    ON alti.ticker_id = stc.ticker_id
-    AND alti.date_id = stc.last_day_id
+LEFT JOIN last_day_stock_price stc
+    ON stc.ticker_id = alti.ticker_id
+    AND stc.last_day_id = alti.date_id
 
-    LEFT JOIN last_day_exchange_rate exr
-    ON alti.date_id = exr.last_day_id
-    AND tic.currency_id = exr.currency_id
+LEFT JOIN last_day_exchange_rate exr
+    ON exr.last_day_id = alti.date_id
+    AND exr.currency_id = tic.currency_id
 )
 
 , current_position AS (
         SELECT 
             ticker_id
-        ,   quantity_cummulated
+        ,   quantity_cumulative
         FROM f_result 
         QUALIFY ROW_NUMBER() OVER (PARTITION BY ticker_id ORDER BY date_id DESC) = 1
         )
@@ -107,4 +122,4 @@ CROSS JOIN dates d
 SELECT 
     * 
 FROM f_result 
-WHERE ticker_id NOT IN (SELECT ticker_id FROM current_position WHERE quantity_cummulated = 0 )
+WHERE ticker_id NOT IN (SELECT ticker_id FROM current_position WHERE quantity_cumulative = 0 )
