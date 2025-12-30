@@ -9,7 +9,7 @@
 WITH cte_stock_info AS 
 (
 SELECT
-    SYMBOL AS TICKER
+    TICKER
 ,   LONGNAME AS TICKER_NAME
 ,   QUOTETYPE
 ,   INITCAP(COALESCE(SECTOR,'Unknown')) AS SECTOR
@@ -19,7 +19,7 @@ SELECT
 ,   CAST(INFO_FETCH_DATE AS TIMESTAMP) AS INFO_FETCH_DATE
 ,   SOURCE_SYSTEM
 ,   CAST(LOAD_TS AS TIMESTAMP) AS LOAD_TS
-FROM {{source('raw','raw_symbol')}}
+FROM {{source('raw','raw_ticker')}}
 {% if is_incremental() %}
 
     WHERE LOAD_TS > (SELECT COALESCE(MAX(LOAD_TS), '1900-01-01'::TIMESTAMP_NTZ) FROM {{this}})

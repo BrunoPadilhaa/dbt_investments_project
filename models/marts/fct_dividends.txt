@@ -17,7 +17,7 @@ WITH t_dividends AS (
       ,   tra.source_file
       ,   source_system
       ,   tra.load_ts
-      FROM {{ref('stg_transactions_pt')}} tra
+      FROM {{ref('stg_transactions_xtb')}} tra
 
       LEFT 
       JOIN {{ref('dim_transaction_type')}} trt

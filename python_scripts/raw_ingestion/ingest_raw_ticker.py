@@ -13,8 +13,8 @@ WH = os.environ['SNOWFLAKE_WH']
 ACCOUNT = os.environ['SNOWFLAKE_ACCOUNT']
 DATABASE = 'INVESTMENTS'
 SCHEMA = 'RAW'
-RAW_TRADES_TABLE = 'RAW_TRANSACTIONS_PT'
-RAW_STOCK_INFO_TABLE = 'RAW_SYMBOL'
+RAW_TRADES_TABLE = 'RAW_TRANSACTIONS_XTB'
+RAW_STOCK_INFO_TABLE = 'RAW_TICKER'
 RAW_TICKER_MAP_TABLE = 'RAW_STOCK_COUNTRY_MAPPING'
 
 ctx = snowflake.connector.connect(
@@ -31,7 +31,7 @@ cs = ctx.cursor()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-# --- Fetch distinct symbols from trades ---
+# --- Fetch distinct symbols from trades XTB---
 cs.execute(f"SELECT DISTINCT SYMBOL FROM {SCHEMA}.{RAW_TRADES_TABLE} WHERE SYMBOL IS NOT NULL")
 symbols = [row[0] for row in cs.fetchall()]
 logger.info(f"Symbols from trades: {symbols}")
@@ -63,7 +63,7 @@ for stock in symbols:
         info = ticker.info
         
         record = {
-            "SYMBOL": stock,
+            "TICKER": stock,
             "SHORTNAME": info.get("shortName"),
             "LONGNAME": info.get("longName"),
             "QUOTETYPE": info.get("quoteType"),

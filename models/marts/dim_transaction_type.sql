@@ -11,7 +11,7 @@ WITH distinct_types AS (
         DISTINCT TRANSACTION_TYPE,
         SOURCE_SYSTEM,
         MIN(LOAD_TS) AS LOAD_TS
-    FROM {{ ref('stg_transactions_pt') }} 
+    FROM {{ ref('stg_transactions_xtb') }} 
     WHERE TRANSACTION_TYPE IS NOT NULL                   
     GROUP BY
         TRANSACTION_TYPE,

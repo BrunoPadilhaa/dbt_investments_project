@@ -17,11 +17,12 @@ WITH cte_raw_trades AS
     ,   CAST(TIME AS TIMESTAMP) AS TRANSACTION_TIME
     ,   COMMENT AS TRANSACTION_COMMENT
     ,   SYMBOL AS TICKER
+    ,   'EUR' AS CURRENCY
     ,   CAST(AMOUNT AS NUMBER(10,2)) AS AMOUNT
     ,   SOURCE_FILE
     ,   SOURCE_SYSTEM
     ,   CAST(LOAD_TS AS TIMESTAMP) AS LOAD_TS
-    FROM {{source('raw','raw_transactions_pt')}}
+    FROM {{source('raw','raw_transactions_xtb')}}
     WHERE ID != 'Total'
 
     {% if is_incremental() %}

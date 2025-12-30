@@ -28,7 +28,7 @@ models:
       - not_null
       - unique
 
-- name: fct_trades
+- name: fct_transactions
   description: "Information about trades"
   columns: 
     - name: transaction_id
