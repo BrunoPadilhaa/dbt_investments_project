@@ -1,0 +1,44 @@
+{{
+    config(
+            materialized = 'incremental',
+            unique_key= 'transaction_id',
+            incremental_strategy = 'merge'
+          )
+}}
+
+WITH t_dividends AS (
+      SELECT
+          tra.transaction_id
+      ,   trt.transaction_type_id
+      ,   tic.ticker_id
+      ,   TO_NUMBER(TO_VARCHAR(tra.transaction_time,'YYYYMMDD')) AS date_id
+      ,   tra.transaction_comment
+      ,   tra.amount
+      ,   tra.source_file
+      ,   source_system
+      ,   tra.load_ts
+      FROM {{ref('stg_transactions_pt')}} tra
+
+      LEFT 
+      JOIN {{ref('dim_transaction_type')}} trt
+      ON tra.transaction_type = trt.transaction_type
+
+      LEFT
+      JOIN {{ref('dim_ticker')}} tic
+      ON tic.original_ticker = tra.ticker
+
+      WHERE tra.transaction_type in  
+      ('Tax IFTT',
+      'Withholding Tax',
+      'Free-Funds Interest Tax',
+      'Free-Funds Interest',
+      'Divident')
+    
+    {% if is_incremental() %}
+
+        AND tra.load_ts >= (SELECT COALESCE(MAX(load_ts), '1900-01-01'::TIMESTAMP_NTZ) FROM {{ this }})
+
+    {% endif %}
+)
+
+SELECT * FROM t_dividends

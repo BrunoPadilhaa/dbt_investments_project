@@ -34,3 +34,5 @@ WITH t_stock_prices AS (
 )
 
 SELECT * FROM t_stock_prices
+
+
