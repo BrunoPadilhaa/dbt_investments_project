@@ -1,5 +1,3 @@
-
-
 WITH transform_trades AS (
     SELECT
         tran.TRANSACTION_ID,
