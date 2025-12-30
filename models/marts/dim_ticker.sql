@@ -11,7 +11,7 @@ WITH CTE_STOCK_COUNTRY AS (
         {{dbt_utils.generate_surrogate_key(['STIN.TICKER'])}} AS TICKER_ID,
         SPLIT_PART(STIN.TICKER, '.', 1) AS TICKER,
         STIN.TICKER AS ORIGINAL_TICKER,
-        STIN.NAME,
+        STIN.TICKER_NAME,
         STIN.QUOTETYPE,
         CASE
             WHEN STIN.SECTOR = 'Real Estate' THEN 'REIT'
