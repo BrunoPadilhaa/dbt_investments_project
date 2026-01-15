@@ -17,7 +17,7 @@ SCRIPT_DIR = Path(__file__).parent / "raw_ingestion"
 LOADERS = [
     "ingest_raw_transactions_xtb.py",
     "ingest_stock_country_mapping.py",
-    "ingest_raw_ticker.py",
+    "ingest_raw_ticker_details.py",
     "ingest_raw_stock_prices.py",
     "ingest_raw_exchange_rates.py",
 ]
