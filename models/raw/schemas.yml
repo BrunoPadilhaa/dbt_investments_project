@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: raw_ticker
+    description: "Cleaned Portuguese trades data"
+    columns:
+      - name: symbol
+        description: "Unique identifier for each trade"
+        tests:
+          - unique
+          - not_null
+      - name: bucket_type
+        description: "Type of bucket for the ticker"
+        tests:
+          - not_null 

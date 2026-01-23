@@ -13,6 +13,14 @@ sources:
           error_after: {count: 45, period: day}
         loaded_at_field: LOAD_TS
 
+      - name: raw_transactions_clear
+        identifier: RAW_TRANSACTIONS_CLEAR
+        description: "Raw transactions from Clear"
+        freshness:
+          warn_after: {count: 35, period: day}
+          error_after: {count: 45, period: day}
+        loaded_at_field: LOAD_TS    
+
       - name: raw_stock_prices
         identifier: RAW_STOCK_PRICES
         description: "Daily stock prices from Yahoo Finance"
@@ -21,9 +29,13 @@ sources:
           error_after: {count: 2, period: day}
         loaded_at_field: LOAD_TS
 
-      - name: raw_ticker
-        identifier: RAW_TICKER
+      - name: raw_ticker_details
+        identifier: raw_ticker_details
         description: "Stock descriptive information such as field, area of business..."
+
+      - name: raw_ticker_seed
+        identifier: RAW_TICKER_SEED
+        description: "Stock descriptive information manually controlled through dbt seed"
 
       - name: raw_exchange_rates
         identifier: RAW_EXCHANGE_RATES
@@ -33,10 +45,3 @@ sources:
           error_after: {count: 2, period: day}
         loaded_at_field: LOAD_TS
 
-      - name: raw_stock_country_mapping
-        identifier: RAW_STOCK_COUNTRY_MAPPING
-        description: "Mapping from which countries/continents the symbol comes from"
-        freshness:
-          warn_after: {count: 1, period: day}
-          error_after: {count: 2, period: day}
-        loaded_at_field: LOAD_TS
