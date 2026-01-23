@@ -29,7 +29,7 @@ CROSS JOIN dates d
         TO_NUMBER(TO_CHAR(LAST_DAY(TO_DATE(TO_VARCHAR(t.TRANSACTION_DATE_ID), 'YYYYMMDD')), 'YYYYMMDD')) AS TRANSACTION_DATE_ID,
         SUM(t.quantity) AS quantity,
         SUM(t.amount) AS amount
-    FROM {{ref('fct_trades')}} t
+    FROM {{ref('fct_transactions')}} t
     GROUP BY
         t.ticker_id,
         TO_NUMBER(TO_CHAR(LAST_DAY(TO_DATE(TO_VARCHAR(t.TRANSACTION_DATE_ID), 'YYYYMMDD')), 'YYYYMMDD'))
