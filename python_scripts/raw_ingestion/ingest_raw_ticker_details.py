@@ -5,106 +5,218 @@ import pandas as pd
 import snowflake.connector
 from snowflake.connector.pandas_tools import write_pandas
 import os
+import requests
+from typing import Optional, Dict
+import pycountry
 
-# --- Snowflake connection info ---
+# --- Configuration ---
 USER = os.environ['SNOWFLAKE_USER']
 PWD = os.environ['SNOWFLAKE_PWD']
 WH = os.environ['SNOWFLAKE_WH']
 ACCOUNT = os.environ['SNOWFLAKE_ACCOUNT']
+
 DATABASE = 'INVESTMENTS'
 SCHEMA = 'RAW'
-RAW_TRADES_TABLE = 'RAW_TRANSACTIONS_XTB'
-RAW_STOCK_INFO_TABLE = 'RAW_TICKER'
-RAW_TICKER_MAP_TABLE = 'RAW_STOCK_COUNTRY_MAPPING'
 
-ctx = snowflake.connector.connect(
-    user=USER,
-    password=PWD,
-    account=ACCOUNT,
-    warehouse=WH,
-    database=DATABASE,
-    schema=SCHEMA
-)
-cs = ctx.cursor()
+RAW_TICKER_DETAILS_TABLE = 'RAW_TICKER_DETAILS'
+RAW_TICKER_SEED_TABLE = 'RAW_TICKER_SEED'
 
 # --- Logging setup ---
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-# --- Fetch distinct symbols from trades XTB---
-cs.execute(f"SELECT DISTINCT SYMBOL FROM {SCHEMA}.{RAW_TRADES_TABLE} WHERE SYMBOL IS NOT NULL")
-symbols = [row[0] for row in cs.fetchall()]
-logger.info(f"Symbols from trades: {symbols}")
+# --- Helper functions ---
 
-# --- Load ticker mapping from dbt seed ---
-ticker_map_query = f"""
-SELECT 
-    SYMBOL,
-    CASE 
-        WHEN YF_SUFFIX IS NOT NULL AND YF_SUFFIX != '' 
-        THEN SPLIT_PART(SYMBOL, '.', 1) || '.' || YF_SUFFIX
-        ELSE SPLIT_PART(SYMBOL, '.', 1)
-    END AS YF_SYMBOL
-FROM {SCHEMA}.{RAW_TICKER_MAP_TABLE}
-"""
-ticker_map_df = pd.read_sql(ticker_map_query, ctx)
-ticker_mapping = dict(zip(ticker_map_df["SYMBOL"], ticker_map_df["YF_SYMBOL"]))
-logger.info(f"Loaded {len(ticker_mapping)} ticker mappings from {RAW_TICKER_MAP_TABLE}")
-
-# --- Fetch stock info for ALL symbols ---
-all_data = []
-
-for stock in symbols:
-    yf_symbol = ticker_mapping.get(stock, stock)
+def get_country_name(country_code: Optional[str]) -> Optional[str]:
+    """Convert country code to country name using pycountry."""
+    if not country_code:
+        return None
     
     try:
-        logger.info(f"Fetching info for {stock} -> {yf_symbol}")
-        ticker = yf.Ticker(yf_symbol)
-        info = ticker.info
-        
-        record = {
-            "TICKER": stock,
+        country = pycountry.countries.get(alpha_2=country_code.strip().upper())
+        return country.name if country else None
+    except Exception as e:
+        logger.warning(f"⚠️ Could not resolve country code '{country_code}': {e}")
+        return None
+
+def is_valid_ticker(symbol: str) -> bool:
+    try:
+        info = yf.Ticker(symbol).info
+        return bool(info and (info.get("regularMarketPrice") or info.get("shortName")))
+    except Exception:
+        return False
+
+def search_yahoo_api(symbol: str) -> Optional[str]:
+    url = "https://query2.finance.yahoo.com/v1/finance/search"
+    params = {"q": symbol, "quotesCount": 5, "newsCount": 0}
+
+    try:
+        response = requests.get(url, params=params, timeout=10)
+        data = response.json()
+
+        for quote in data.get("quotes", []):
+            yf_symbol = quote.get("symbol")
+            if yf_symbol and is_valid_ticker(yf_symbol):
+                logger.info(f"✅ Found via API: {symbol} -> {yf_symbol}")
+                return yf_symbol
+
+    except Exception as e:
+        logger.warning(f"Yahoo API search failed for {symbol}: {e}")
+
+    return None
+
+def find_yahoo_ticker(yahoo_candidate: str) -> Optional[str]:
+    if not yahoo_candidate:
+        return None
+
+    if is_valid_ticker(yahoo_candidate):
+        logger.info(f"✅ Valid ticker: {yahoo_candidate}")
+        return yahoo_candidate
+
+    # Try API search as fallback
+    result = search_yahoo_api(yahoo_candidate)
+    if result:
+        return result
+    
+    logger.warning(f"⚠️ Could not validate: {yahoo_candidate}")
+    return None
+
+def build_yahoo_ticker(current_ticker: str, exchange_suffix: str) -> str:
+    """
+    Build Yahoo Finance ticker from seed metadata.
+    Handles US tickers and existing formatted tickers.
+    """
+    if not current_ticker:
+        return None
+    
+    current_ticker = current_ticker.strip()
+    exchange_suffix = exchange_suffix.strip() if exchange_suffix else ""
+    
+    # US tickers have no suffix in Yahoo
+    if not exchange_suffix or exchange_suffix.upper() == "US":
+        if current_ticker.upper().endswith(".US"):
+            return current_ticker[:-3]
+        return current_ticker
+    
+    # Already formatted (e.g., ENEL.IT, TTE.FR)
+    if "." in current_ticker:
+        logger.info(f"Ticker already formatted: {current_ticker}")
+        return current_ticker
+    
+    return f"{current_ticker}.{exchange_suffix}"
+
+def fetch_ticker_info(original_symbol: str, yf_symbol: Optional[str], country_code: Optional[str]) -> Dict:
+    now_ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Convert country code to country name
+    country_name = get_country_name(country_code)
+
+    record = {
+        "TICKER": original_symbol,
+        "YF_TICKER": yf_symbol,
+        "COUNTRY": country_name,
+        "LOAD_TS": now_ts
+    }
+
+    if not yf_symbol:
+        logger.error(f"❌ UNRESOLVED YAHOO TICKER FOR {original_symbol}")
+        for col in ["SHORTNAME", "LONGNAME", "QUOTETYPE", "SECTOR", "INDUSTRY", "CURRENCY", "EXCHANGE"]:
+            record[col] = None
+        return record
+
+    try:
+        info = yf.Ticker(yf_symbol).info
+
+        record.update({
             "SHORTNAME": info.get("shortName"),
             "LONGNAME": info.get("longName"),
             "QUOTETYPE": info.get("quoteType"),
             "SECTOR": info.get("sector"),
             "INDUSTRY": info.get("industry"),
             "CURRENCY": info.get("currency"),
-            "EXCHANGE": info.get("exchange"),
-            "INFO_FETCH_DATE": datetime.now().date(),
-            "SOURCE_SYSTEM": "yahoo_finance"
-        }
-        all_data.append(record)
-        logger.info(f"✅ Fetched info for {stock}")
-        
-    except Exception as e:
-        logger.error(f"❌ Failed fetching info for {stock}: {e}")
+            "EXCHANGE": info.get("exchange")
+        })
 
-# --- Truncate and Load into Snowflake ---
-if all_data:
-    df = pd.DataFrame(all_data)
-    
+        logger.info(f"✅ Fetched info for {original_symbol} -> {yf_symbol} ({country_name})")
+
+    except Exception as e:
+        logger.error(f"❌ Failed fetching info for {original_symbol}: {e}")
+        for col in ["SHORTNAME", "LONGNAME", "QUOTETYPE", "SECTOR", "INDUSTRY", "CURRENCY", "EXCHANGE"]:
+            record[col] = None
+
+    return record
+
+# --- Main execution ---
+
+def main():
+    logger.info("=" * 60)
+    logger.info("Ticker Details Update (Seed-Driven, Deterministic)")
+    logger.info("=" * 60)
+
+    ctx = snowflake.connector.connect(
+        user=USER,
+        password=PWD,
+        account=ACCOUNT,
+        warehouse=WH,
+        database=DATABASE,
+        schema=SCHEMA
+    )
+    cs = ctx.cursor()
+
     try:
-        # Truncate existing data
-        logger.info(f"Truncating {SCHEMA}.{RAW_STOCK_INFO_TABLE}")
-        cs.execute(f"TRUNCATE TABLE IF EXISTS {SCHEMA}.{RAW_STOCK_INFO_TABLE}")
-        
-        # Load fresh data
-        logger.info(f"Loading {len(df)} rows into {SCHEMA}.{RAW_STOCK_INFO_TABLE}")
-        success, nchunks, nrows, _ = write_pandas(ctx, df, RAW_STOCK_INFO_TABLE, schema=SCHEMA)
-        
-        if success:
-            logger.info(f"✅ Successfully loaded {nrows} rows into {SCHEMA}.{RAW_STOCK_INFO_TABLE}")
-        else:
-            logger.error(f"❌ Failed to load data into Snowflake")
-            
-    except Exception as e:
-        logger.error(f"❌ Error during truncate and load: {e}")
-        
-else:
-    logger.warning("⚠️ No stock info fetched - table not updated")
+        logger.info(f"Truncating {SCHEMA}.{RAW_TICKER_DETAILS_TABLE}")
+        cs.execute(f"TRUNCATE TABLE IF EXISTS {SCHEMA}.{RAW_TICKER_DETAILS_TABLE}")
 
-# --- Cleanup ---
-cs.close()
-ctx.close()
-logger.info("Script completed")
+        cs.execute(f"""
+            SELECT DISTINCT
+                SYMBOL,
+                CURRENT_TICKER,
+                EXCHANGE_SUFFIX,
+                COUNTRY_CODE
+            FROM {SCHEMA}.{RAW_TICKER_SEED_TABLE}
+            WHERE CURRENT_TICKER IS NOT NULL
+        """)
+
+        rows = cs.fetchall()
+        logger.info(f"Found {len(rows)} tickers to process")
+
+        all_data = []
+
+        for original_symbol, current_ticker, exchange_suffix, country_code in rows:
+            yahoo_candidate = build_yahoo_ticker(current_ticker, exchange_suffix)
+            yf_symbol = find_yahoo_ticker(yahoo_candidate)
+
+            record = fetch_ticker_info(
+                original_symbol=original_symbol,
+                yf_symbol=yf_symbol,
+                country_code=country_code
+            )
+
+            all_data.append(record)
+
+        if all_data:
+            df = pd.DataFrame(all_data)
+
+            logger.info(f"Loading {len(df)} rows into {SCHEMA}.{RAW_TICKER_DETAILS_TABLE}")
+            success, _, nrows, _ = write_pandas(
+                ctx,
+                df,
+                RAW_TICKER_DETAILS_TABLE,
+                schema=SCHEMA
+            )
+
+            if success:
+                logger.info(f"✅ Loaded {nrows} rows into {RAW_TICKER_DETAILS_TABLE}")
+            else:
+                logger.error("❌ Failed to load data")
+
+    finally:
+        cs.close()
+        ctx.close()
+        logger.info("=" * 60)
+        logger.info("Script finished")
+        logger.info("=" * 60)
+
+
+if __name__ == "__main__":
+    main()

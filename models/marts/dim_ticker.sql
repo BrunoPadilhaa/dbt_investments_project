@@ -6,33 +6,28 @@
     )
 }}
 
-WITH CTE_STOCK_COUNTRY AS (
+WITH CTE_TICKER AS (
     SELECT
-        {{dbt_utils.generate_surrogate_key(['STIN.TICKER'])}} AS TICKER_ID,
-        SPLIT_PART(STIN.TICKER, '.', 1) AS TICKER,
-        STIN.TICKER AS ORIGINAL_TICKER,
-        STIN.TICKER_NAME,
-        STIN.QUOTETYPE,
-        CASE
-            WHEN STIN.SECTOR = 'Real Estate' THEN 'REIT'
-            WHEN STIN.QUOTETYPE = 'EQUITY' THEN 'STOCKS'
-            WHEN STIN.QUOTETYPE = 'ETF' THEN STIN.QUOTETYPE
-            ELSE 'OTHERS'
-        END AS TYPE,
-        STIN.SECTOR,
-        STIN.INDUSTRY,
-        CURR.CURRENCY_ID,
-        STIN.EXCHANGE,
-        SCMA.COUNTRY_NAME,
-        SCMA.CONTINENT,
-        STIN.INFO_FETCH_DATE,
-        STIN.LOAD_TS,
-        CURRENT_TIMESTAMP()::TIMESTAMP_NTZ AS DBT_UPDATED_AT
-    FROM {{ ref('stg_ticker') }} STIN
-    LEFT JOIN {{ ref('stg_stock_country_mapping') }} SCMA
-        ON SCMA.TICKER = STIN.TICKER
-    LEFT JOIN {{ ref('dim_currency') }} CURR
-        ON CURR.CURRENCY_ABRV = STIN.CURRENCY
+        {{dbt_utils.generate_surrogate_key(['TICK.ORIGINAL_TICKER'])}} AS TICKER_ID,
+        TICK.ORIGINAL_TICKER,
+        TICK.TICKER,
+        TICK.TICKER_NAME,
+        TICK.BUCKET_TYPE,
+        TICK.COUNTRY_CODE,
+        TIDE.YAHOO_FINANCE_TICKER,
+        TIDE.COUNTRY,
+        TIDE.SHORTNAME,
+        TIDE.QUOTETYPE,
+        TIDE.SECTOR,
+        TIDE.INDUSTRY,
+        TIDE.CURRENCY,
+        TIDE.EXCHANGE,
+        TICK.SOURCE_SYSTEM,
+        TICK.LOAD_TS
+    FROM {{ ref('stg_ticker') }} TICK
+    
+    LEFT JOIN {{ ref('stg_ticker_details') }} TIDE
+        ON TICK.ORIGINAL_TICKER = TIDE.ORIGINAL_TICKER
 )
 
-SELECT * FROM CTE_STOCK_COUNTRY
+SELECT * FROM CTE_TICKER

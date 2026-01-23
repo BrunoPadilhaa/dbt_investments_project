@@ -4,21 +4,22 @@ config-version: 2
 
 profile: 'INVESTMENTS'
 
-# Model configuration
 models:
-  INVESTMENTS:                 # matches your root folder
+  INVESTMENTS:
+    raw:
+      +schema: RAW
+      +materialized: table
     staging:
-      +schema: STAGING       # absolute schema name;
+      +schema: STAGING
       +materialized: table
     marts:
-      +schema: PROD        # absolute schema name for prod
+      +schema: PROD
       +materialized: table
 
-# Seeds configuration
 seeds:
   INVESTMENTS:
     +schema: RAW
-                   # seeds go to RAW schema
+
 snapshots:
-   INVESTMENTS:
+  INVESTMENTS:
     +schema: PROD

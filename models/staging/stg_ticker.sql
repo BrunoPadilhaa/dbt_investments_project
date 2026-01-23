@@ -1,30 +1,23 @@
 {{
     config(
         materialized = 'incremental',
-        unique_key = 'TICKER',
+        unique_key = 'original_ticker',
         incremental_strategy = 'merge'
     )
 }}
 
-WITH cte_stock_info AS 
+WITH cte_ticker AS 
 (
 SELECT
-    TICKER
-,   LONGNAME AS TICKER_NAME
-,   QUOTETYPE
-,   INITCAP(COALESCE(SECTOR,'Unknown')) AS SECTOR
-,   COALESCE(INDUSTRY,'Unknown') AS INDUSTRY
-,   UPPER(CURRENCY) AS CURRENCY
-,   UPPER(EXCHANGE) AS EXCHANGE
-,   CAST(INFO_FETCH_DATE AS TIMESTAMP) AS INFO_FETCH_DATE
-,   SOURCE_SYSTEM
-,   CAST(LOAD_TS AS TIMESTAMP) AS LOAD_TS
-FROM {{source('raw','raw_ticker')}}
-{% if is_incremental() %}
-
-    WHERE LOAD_TS > (SELECT COALESCE(MAX(LOAD_TS), '1900-01-01'::TIMESTAMP_NTZ) FROM {{this}})
-{% endif %}
-
+    UPPER(TRIM(SYMBOL)) AS ORIGINAL_TICKER
+,   UPPER(TRIM(CURRENT_TICKER)) AS TICKER
+,   UPPER(TRIM(TICKER_NAME)) AS TICKER_NAME
+,   REPLACE(INITCAP(TRIM(BUCKET_TYPE)), '_', ' ') AS BUCKET_TYPE //Will create a mapping table for BUCKET_TYPE instead
+,   UPPER(TRIM(EXCHANGE_SUFFIX)) AS EXCHANGE_SUFFIX
+,   UPPER(TRIM(COUNTRY_CODE)) AS COUNTRY_CODE    
+,   TRIM(SOURCE_SYSTEM) AS SOURCE_SYSTEM
+,   TO_TIMESTAMP(LOAD_TS) AS LOAD_TS
+FROM {{ ref('raw_ticker') }}
 )
 
-SELECT * FROM cte_stock_info
+SELECT * FROM cte_ticker
