@@ -39,7 +39,6 @@ cs.execute(
 )
 max_date = cs.fetchone()[0]
 
-# Normalize Snowflake DATE -> python date
 if isinstance(max_date, datetime):
     max_date = max_date.date()
 
@@ -87,6 +86,10 @@ def fetch_stock_data(stocks, start_date, end_date, ticker_map):
         try:
             logger.info(f"Fetching {stock} -> {yf_symbol}")
             ticker = yf.Ticker(yf_symbol)
+
+            # --- Fetch currency once per ticker ---
+            currency = ticker.info.get("currency")
+
             data = ticker.history(
                 start=start_date,
                 end=end_date,
@@ -100,7 +103,7 @@ def fetch_stock_data(stocks, start_date, end_date, ticker_map):
 
             for dt, row in data.iterrows():
                 record = {
-                    "SYMBOL": stock,  # original symbol name
+                    "SYMBOL": stock,  # original symbol
                     "PRICE_DATE": dt.date(),
                     "PRICE_OPEN": round(row["Open"], 2),
                     "PRICE_HIGH": round(row["High"], 2),
@@ -112,11 +115,14 @@ def fetch_stock_data(stocks, start_date, end_date, ticker_map):
                         else None
                     ),
                     "PRICE_VOLUME": int(row["Volume"]),
+                    "CURRENCY": currency,
                     "SOURCE_SYSTEM": "yahoo finance"
                 }
                 all_data.append(record)
 
-            logger.info(f"Retrieved {len(data)} rows for {stock} -> {yf_symbol}")
+            logger.info(
+                f"Retrieved {len(data)} rows for {stock} -> {yf_symbol} ({currency})"
+            )
 
         except Exception as e:
             logger.error(f"Failed {stock} -> {yf_symbol}: {e}")

@@ -17,6 +17,7 @@ WITH t_stock_prices AS (
     ,   STPR.PRICE_CLOSE
     ,   STPR.PRICE_ADJ_CLOSE
     ,   STPR.PRICE_VOLUME
+    ,   CURR.CURRENCY_ID AS PRICE_CURRENCY_ID
     ,   STPR.SOURCE_SYSTEM
     ,   STPR.LOAD_TS
     ,   CURRENT_TIMESTAMP()::TIMESTAMP_NTZ AS DBT_UPDATED_AT
@@ -25,6 +26,9 @@ WITH t_stock_prices AS (
     LEFT
     JOIN {{ref('dim_ticker')}} TICK
     ON TICK.ORIGINAL_TICKER = STPR.TICKER
+
+    LEFT JOIN {{ ref('dim_currency') }} curr
+        ON CURR.CURRENCY_ABRV = STPR.CURRENCY
 
     {% if is_incremental() %}
 
