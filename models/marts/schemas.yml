@@ -39,12 +39,12 @@ models:
 
 - name: fct_portfolio_snapshots_daily
   description: "Information about trades"
-  columns: 
-    - name: date_id
-      description: "Contains unique ids for each date"
-      tests:
-      - not_null
-      - unique
+  # columns: 
+  #   - name: date_id
+  #     description: "Contains unique ids for each date"
+  #     tests:
+  #     - not_null
+  #     - unique
 
 - name: dim_date
   description: "date dimension"

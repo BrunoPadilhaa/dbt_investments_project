@@ -204,7 +204,7 @@ WITH calendar AS (
     
         -- Current market value: (cumulative shares) × (current price in native currency) × (FX rate to EUR)
     ,   CAST(
-            quantity_cumulative * stpr.price_adj_close_filled * exra.exchange_rate_filled 
+            quantity_cumulative * stpr.price_adj_close_filled * COALESCE(exra.exchange_rate_filled, 1) -- Default FX rate to 1 if missing (e.g., EUR to EUR) 
             AS DECIMAL(10,2)
         ) AS portfolio_value_eur
     

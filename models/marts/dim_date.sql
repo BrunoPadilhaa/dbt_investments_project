@@ -1,6 +1,6 @@
 with date_range as (
     select 
-        dateadd(day, seq4(), date '2025-01-01') as dt
+        dateadd(day, seq4(), date '2015-01-01') as dt
     from table(generator(rowcount => 365 * 20))
 )
 

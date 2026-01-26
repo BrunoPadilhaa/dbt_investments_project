@@ -35,8 +35,8 @@ max_date_result = cs.fetchone()[0]
 
 # If table is empty, start from beginning of year
 if max_date_result is None:
-    start_date = datetime(2025, 1, 1).date()
-    logger.info("Table is empty. Fetching from 2025-01-01")
+    start_date = datetime(2024, 1, 1).date()
+    logger.info("Table is empty. Fetching from 2024-01-01")
 else:
     # Start from day AFTER last loaded date
     start_date = max_date_result + timedelta(days=1)

@@ -56,12 +56,3 @@ models:
         description: "Symbol for the stock"
         tests:
           - not_null
-
-  - name: stg_stock_country_mapping
-    description: "Cleaned tickers mapping country"
-    columns:
-      - name: ticker
-        description: "Tickers for the stock"
-        tests:
-          - not_null
-          - unique

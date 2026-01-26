@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 # --- Fetch last loaded price date ---
 cs.execute(
     f"""
-    SELECT COALESCE(MAX(PRICE_DATE), TO_DATE('2025-01-01'))
+    SELECT COALESCE(MAX(PRICE_DATE), TO_DATE('2024-01-01'))
     FROM {SCHEMA}.{RAW_STOCK_PRICES_TABLE}
     """
 )
