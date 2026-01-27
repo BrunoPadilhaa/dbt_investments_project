@@ -21,6 +21,11 @@ final_types AS (
     SELECT
         {{dbt_utils.generate_surrogate_key(['TRANSACTION_TYPE'])}} AS TRANSACTION_TYPE_ID,
         TRANSACTION_TYPE,
+        CASE 
+            WHEN TRANSACTION_TYPE IN ('Divident','Tax IFTT','Withholding Tax','Sec Fee','Free-Funds Interest Tax',
+'Free-Funds Interest') THEN 'Divident' 
+            ELSE TRANSACTION_TYPE 
+        END AS TRANSACTION_TYPE_GROUP,
         LOAD_TS,
         CURRENT_TIMESTAMP() AS DBT_UPDATED_AT
     FROM distinct_types

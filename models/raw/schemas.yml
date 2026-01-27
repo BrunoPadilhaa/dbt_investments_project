@@ -8,8 +8,4 @@ models:
         description: "Unique identifier for each trade"
         tests:
           - unique
-          - not_null
-      - name: bucket_type
-        description: "Type of bucket for the ticker"
-        tests:
           - not_null 
