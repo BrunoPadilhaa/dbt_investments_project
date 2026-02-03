@@ -4,6 +4,10 @@ from snowflake.connector.pandas_tools import write_pandas
 from datetime import datetime
 import os
 import warnings
+from dotenv import load_dotenv
+
+# --- Load environment variables from .env file ---
+load_dotenv('python_env.env')  # Specify your .env file name
 
 # Suppress openpyxl warnings about default styles
 warnings.filterwarnings('ignore', category=UserWarning, module='openpyxl')

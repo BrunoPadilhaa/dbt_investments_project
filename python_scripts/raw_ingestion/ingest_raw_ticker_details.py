@@ -8,6 +8,10 @@ import os
 import requests
 from typing import Optional, Dict
 import pycountry
+from dotenv import load_dotenv
+
+# --- Load environment variables from .env file ---
+load_dotenv('python_env.env')  # Specify your .env file name
 
 # --- Configuration ---
 USER = os.environ['SNOWFLAKE_USER']

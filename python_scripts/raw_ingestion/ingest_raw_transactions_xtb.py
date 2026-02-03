@@ -3,6 +3,11 @@ import snowflake.connector
 from snowflake.connector.pandas_tools import write_pandas
 from datetime import datetime
 import os
+from dotenv import load_dotenv
+
+# --- Load environment variables from .env file ---
+load_dotenv('python_env.env')  # Specify your .env file name
+
 # --- Snowflake connection info ---
 USER = os.environ['SNOWFLAKE_USER']
 PWD = os.environ['SNOWFLAKE_PWD']
