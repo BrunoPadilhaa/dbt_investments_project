@@ -1,14 +1,14 @@
 {{
     config(
         materialized = 'incremental'
-    ,   unique_key = ['TICKER','PRICE_DATE']
+    ,   unique_key = ['ASSET_CODE','PRICE_DATE']
     ,   on_schema_change = 'fail'
     )
 }}
 
-WITH stock_prices AS (
+WITH asset_prices AS (
 SELECT 
-    SYMBOL AS TICKER
+    UPPER(TRIM(ASSET_CODE)) AS ASSET_CODE
 ,   CAST(PRICE_DATE AS DATE) AS PRICE_DATE
 ,   CAST(PRICE_OPEN AS NUMBER(10,2)) AS PRICE_OPEN
 ,   CAST(PRICE_HIGH AS NUMBER(10,2)) AS PRICE_HIGH
@@ -19,7 +19,7 @@ SELECT
 ,   UPPER(TRIM(CURRENCY)) AS CURRENCY
 ,   SOURCE_SYSTEM
 ,   CAST(LOAD_TS AS TIMESTAMP) AS LOAD_TS
-FROM {{source('raw','raw_stock_prices')}}
+FROM {{source('raw','raw_asset_prices')}}
 
 {% if is_incremental() %}
 
@@ -29,4 +29,4 @@ FROM {{source('raw','raw_stock_prices')}}
 
 )
 
-SELECT * FROM stock_prices
+SELECT * FROM asset_prices

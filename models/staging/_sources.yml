@@ -21,9 +21,9 @@ sources:
           error_after: {count: 45, period: day}
         loaded_at_field: LOAD_TS    
 
-      - name: raw_stock_prices
-        identifier: RAW_STOCK_PRICES
-        description: "Daily stock prices from Yahoo Finance"
+      - name: raw_asset_prices
+        identifier: RAW_ASSET_PRICES
+        description: "Daily asset prices from Yahoo Finance"
         freshness:
           warn_after: {count: 1, period: day}
           error_after: {count: 2, period: day}

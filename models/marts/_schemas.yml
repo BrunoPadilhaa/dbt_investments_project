@@ -1,11 +1,11 @@
 version: 2
 
 models:
-- name: dim_ticker
-  description: "Information about the stocks"
+- name: dim_asset
+  description: "Information about the assets in the portfolio"
   columns: 
-    - name: ticker_id
-      description: "Contains unique ids for each stock"
+    - name: asset_id
+      description: "Contains unique ids for each asset"
       tests:
       - not_null
       - unique
@@ -54,4 +54,12 @@ models:
       tests:
       - not_null
       - unique
+
+- name: fct_asset_prices
+  description: "Daily asset prices"
+  columns: 
+    - name: asset_id
+      description: "Contains unique ids for each asset"
+      tests:
+      - not_null
 
