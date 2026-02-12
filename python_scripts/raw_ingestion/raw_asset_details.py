@@ -22,8 +22,8 @@ ACCOUNT = os.environ['SNOWFLAKE_ACCOUNT']
 DATABASE = 'INVESTMENTS'
 SCHEMA = 'RAW'
 
-RAW_TICKER_DETAILS_TABLE = 'RAW_TICKER_DETAILS'
-RAW_TICKER_SEED_TABLE = 'RAW_TICKER_SEED'
+RAW_ASSET_DETAILS_TABLE = 'RAW_ASSET_DETAILS'
+RAW_ASSET_SEED_TABLE = 'RAW_ASSET_SEED'
 
 # --- Logging setup ---
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -43,7 +43,8 @@ def get_country_name(country_code: Optional[str]) -> Optional[str]:
         logger.warning(f"⚠️ Could not resolve country code '{country_code}': {e}")
         return None
 
-def is_valid_ticker(symbol: str) -> bool:
+def is_valid_asset_code(symbol: str) -> bool:
+    """Check if the asset code is valid on Yahoo Finance."""
     try:
         info = yf.Ticker(symbol).info
         return bool(info and (info.get("regularMarketPrice") or info.get("shortName")))
@@ -51,6 +52,7 @@ def is_valid_ticker(symbol: str) -> bool:
         return False
 
 def search_yahoo_api(symbol: str) -> Optional[str]:
+    """Search Yahoo Finance API for asset symbol."""
     url = "https://query2.finance.yahoo.com/v1/finance/search"
     params = {"q": symbol, "quotesCount": 5, "newsCount": 0}
 
@@ -60,7 +62,7 @@ def search_yahoo_api(symbol: str) -> Optional[str]:
 
         for quote in data.get("quotes", []):
             yf_symbol = quote.get("symbol")
-            if yf_symbol and is_valid_ticker(yf_symbol):
+            if yf_symbol and is_valid_asset_code(yf_symbol):
                 logger.info(f"✅ Found via API: {symbol} -> {yf_symbol}")
                 return yf_symbol
 
@@ -69,12 +71,13 @@ def search_yahoo_api(symbol: str) -> Optional[str]:
 
     return None
 
-def find_yahoo_ticker(yahoo_candidate: str) -> Optional[str]:
+def find_yahoo_asset_code(yahoo_candidate: str) -> Optional[str]:
+    """Find and validate Yahoo Finance asset code."""
     if not yahoo_candidate:
         return None
 
-    if is_valid_ticker(yahoo_candidate):
-        logger.info(f"✅ Valid ticker: {yahoo_candidate}")
+    if is_valid_asset_code(yahoo_candidate):
+        logger.info(f"✅ Valid asset code: {yahoo_candidate}")
         return yahoo_candidate
 
     # Try API search as fallback
@@ -85,51 +88,55 @@ def find_yahoo_ticker(yahoo_candidate: str) -> Optional[str]:
     logger.warning(f"⚠️ Could not validate: {yahoo_candidate}")
     return None
 
-def build_yahoo_ticker(current_ticker: str, exchange_suffix: str) -> str:
+def build_yahoo_asset_code(asset_code_current: str, code_suffix: str) -> str:
     """
-    Build Yahoo Finance ticker from seed metadata.
-    Handles US tickers and existing formatted tickers.
+    Build Yahoo Finance asset code from seed metadata.
+    Handles US assets and existing formatted codes.
     """
-    if not current_ticker:
+    if not asset_code_current:
         return None
     
-    current_ticker = current_ticker.strip()
-    exchange_suffix = exchange_suffix.strip() if exchange_suffix else ""
+    asset_code_current = asset_code_current.strip()
+    code_suffix = code_suffix.strip() if code_suffix else ""
     
-    # US tickers have no suffix in Yahoo
-    if not exchange_suffix or exchange_suffix.upper() == "US":
-        if current_ticker.upper().endswith(".US"):
-            return current_ticker[:-3]
-        return current_ticker
+    # US assets have no suffix in Yahoo
+    if not code_suffix or code_suffix.upper() == "US":
+        if asset_code_current.upper().endswith(".US"):
+            return asset_code_current[:-3]
+        return asset_code_current
     
     # Already formatted (e.g., ENEL.IT, TTE.FR)
-    if "." in current_ticker:
-        logger.info(f"Ticker already formatted: {current_ticker}")
-        return current_ticker
+    if "." in asset_code_current:
+        logger.info(f"Asset code already formatted: {asset_code_current}")
+        return asset_code_current
     
-    return f"{current_ticker}.{exchange_suffix}"
+    return f"{asset_code_current}.{code_suffix}"
 
-def fetch_ticker_info(original_symbol: str, yf_symbol: Optional[str], country_code: Optional[str]) -> Dict:
+def fetch_asset_info(asset_code: str, yf_asset_code: Optional[str], country_code: Optional[str]) -> Dict:
+    """Fetch asset information from Yahoo Finance."""
     now_ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Convert country code to country name
     country_name = get_country_name(country_code)
 
+    source_system = "yahoo_finance"
+
     record = {
-        "TICKER": original_symbol,
-        "YF_TICKER": yf_symbol,
+        "ASSET_CODE": asset_code,
+        "YF_ASSET_CODE": yf_asset_code,
         "COUNTRY": country_name,
+        "SOURCE_SYSTEM": source_system,
         "LOAD_TS": now_ts
     }
 
-    if not yf_symbol:
-        logger.error(f"❌ UNRESOLVED YAHOO TICKER FOR {original_symbol}")
+    if not yf_asset_code:
+        logger.error(f"❌ UNRESOLVED YAHOO ASSET CODE FOR {asset_code}")
         for col in ["SHORTNAME", "LONGNAME", "QUOTETYPE", "SECTOR", "INDUSTRY", "CURRENCY", "EXCHANGE"]:
             record[col] = None
         return record
 
     try:
-        info = yf.Ticker(yf_symbol).info
+        info = yf.Ticker(yf_asset_code).info
 
         record.update({
             "SHORTNAME": info.get("shortName"),
@@ -141,10 +148,10 @@ def fetch_ticker_info(original_symbol: str, yf_symbol: Optional[str], country_co
             "EXCHANGE": info.get("exchange")
         })
 
-        logger.info(f"✅ Fetched info for {original_symbol} -> {yf_symbol} ({country_name})")
+        logger.info(f"✅ Fetched info for {asset_code} -> {yf_asset_code} ({country_name})")
 
     except Exception as e:
-        logger.error(f"❌ Failed fetching info for {original_symbol}: {e}")
+        logger.error(f"❌ Failed fetching info for {asset_code}: {e}")
         for col in ["SHORTNAME", "LONGNAME", "QUOTETYPE", "SECTOR", "INDUSTRY", "CURRENCY", "EXCHANGE"]:
             record[col] = None
 
@@ -154,7 +161,7 @@ def fetch_ticker_info(original_symbol: str, yf_symbol: Optional[str], country_co
 
 def main():
     logger.info("=" * 60)
-    logger.info("Ticker Details Update (Seed-Driven, Deterministic)")
+    logger.info("Asset Details Update (Seed-Driven, Deterministic)")
     logger.info("=" * 60)
 
     ctx = snowflake.connector.connect(
@@ -168,31 +175,31 @@ def main():
     cs = ctx.cursor()
 
     try:
-        logger.info(f"Truncating {SCHEMA}.{RAW_TICKER_DETAILS_TABLE}")
-        cs.execute(f"TRUNCATE TABLE IF EXISTS {SCHEMA}.{RAW_TICKER_DETAILS_TABLE}")
+        logger.info(f"Truncating {SCHEMA}.{RAW_ASSET_DETAILS_TABLE}")
+        cs.execute(f"TRUNCATE TABLE IF EXISTS {SCHEMA}.{RAW_ASSET_DETAILS_TABLE}")
 
         cs.execute(f"""
             SELECT DISTINCT
-                SYMBOL,
-                CURRENT_TICKER,
-                EXCHANGE_SUFFIX,
+                ASSET_CODE,
+                ASSET_CODE_CURRENT,
+                CODE_SUFFIX,
                 COUNTRY_CODE
-            FROM {SCHEMA}.{RAW_TICKER_SEED_TABLE}
-            WHERE CURRENT_TICKER IS NOT NULL
+            FROM {SCHEMA}.{RAW_ASSET_SEED_TABLE}
+            WHERE ASSET_CODE_CURRENT IS NOT NULL
         """)
 
         rows = cs.fetchall()
-        logger.info(f"Found {len(rows)} tickers to process")
+        logger.info(f"Found {len(rows)} assets to process")
 
         all_data = []
 
-        for original_symbol, current_ticker, exchange_suffix, country_code in rows:
-            yahoo_candidate = build_yahoo_ticker(current_ticker, exchange_suffix)
-            yf_symbol = find_yahoo_ticker(yahoo_candidate)
+        for asset_code, asset_code_current, code_suffix, country_code in rows:
+            yahoo_candidate = build_yahoo_asset_code(asset_code_current, code_suffix)
+            yf_asset_code = find_yahoo_asset_code(yahoo_candidate)
 
-            record = fetch_ticker_info(
-                original_symbol=original_symbol,
-                yf_symbol=yf_symbol,
+            record = fetch_asset_info(
+                asset_code=asset_code,
+                yf_asset_code=yf_asset_code,
                 country_code=country_code
             )
 
@@ -201,16 +208,16 @@ def main():
         if all_data:
             df = pd.DataFrame(all_data)
 
-            logger.info(f"Loading {len(df)} rows into {SCHEMA}.{RAW_TICKER_DETAILS_TABLE}")
+            logger.info(f"Loading {len(df)} rows into {SCHEMA}.{RAW_ASSET_DETAILS_TABLE}")
             success, _, nrows, _ = write_pandas(
                 ctx,
                 df,
-                RAW_TICKER_DETAILS_TABLE,
+                RAW_ASSET_DETAILS_TABLE,
                 schema=SCHEMA
             )
 
             if success:
-                logger.info(f"✅ Loaded {nrows} rows into {RAW_TICKER_DETAILS_TABLE}")
+                logger.info(f"✅ Loaded {nrows} rows into {RAW_ASSET_DETAILS_TABLE}")
             else:
                 logger.error("❌ Failed to load data")
 

@@ -5,13 +5,6 @@
 ) }}
 
 WITH all_currencies AS (
-    -- SELECT UPPER(TRIM(CURRENCY)) AS CURRENCY_ABRV, MAX(LOAD_TS) AS LOAD_TS
-    -- FROM {{ ref('stg_ticker') }}
-    -- WHERE CURRENCY IS NOT NULL
-    -- GROUP BY 1
-
-    -- UNION ALL
-
     SELECT UPPER(TRIM(CURRENCY_FROM)) AS CURRENCY_ABRV, MAX(LOAD_TS) AS LOAD_TS
     FROM {{ ref('stg_exchange_rates') }}
     WHERE CURRENCY_FROM IS NOT NULL
