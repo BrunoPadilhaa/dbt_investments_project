@@ -1,0 +1,91 @@
+﻿ASSET_CODE,ASSET_CODE_CURRENT,ASSET_NAME,CODE_SUFFIX,ASSET_TYPE
+4GLD.DE,4GLD,Xetra-Gold,DE,STOCK
+A7RN11,A7RN11,A7RN FII,SA,REIT
+A7RN3,A7RN3,A7RN Participações,SA,STOCK
+AAPL,AAPL,Apple Inc.,,STOCK
+ABEV3,ABEV3,Ambev S.A.,SA,STOCK
+AESB1,AESB3,AES Brasil Energia S.A.,SA,STOCK
+AESB3,AESB3,AES Brasil Energia S.A.,SA,STOCK
+ALUP11,ALUP11,Aliança Trust Renda Imobiliária FII,SA,REIT
+ALZR11,ALZR11,Alianza Trust Renda Imobiliária FII,SA,REIT
+ALZR12,ALZR11,Alianza Trust Renda Imobiliária FII,SA,REIT
+ARCC,ARCC,Ares Capital Corporation,,REIT
+AURE3,AURE3,Auren Energia S.A.,SA,STOCK
+BBAS3,BBAS3,Banco do Brasil S.A.,SA,STOCK
+BBSE3,BBSE3,BB Seguridade Participações S.A.,SA,STOCK
+BHIA3,VIIA3,Via S.A.,SA,STOCK
+BIDI4,BIDI4,Banco Inter S.A.,SA,STOCK
+BRFS3,BRFS3,BRF S.A.,SA,STOCK
+BTLG11,BTLG11,BTG Pactual Logística FII,SA,REIT
+BTLG12,BTLG11,BTG Pactual Logística FII,SA,REIT
+COGN3,COGN3,Cogna Educação S.A.,SA,STOCK
+COST,COST,Costco Wholesale Corporation,,STOCK
+CPLE6,CPLE6,Copel - Companhia Paranaense de Energia,SA,STOCK
+CVCB1,CVCB3,CVC Brasil Operadora e Agência de Viagens S.A.,SA,STOCK
+CVCB3,CVCB3,CVC Brasil Operadora e Agência de Viagens S.A.,SA,STOCK
+ENBR3,ENBR3,EDP - Energias do Brasil S.A.,SA,STOCK
+ENEL.IT,ENEL,Enel S.p.A.,IT,STOCK
+EUNA.DE,EUNA,Encavis AG,DE,STOCK
+EVEN3,EVEN3,Even Construtora e Incorporadora S.A.,SA,STOCK
+FLRY1,FLRY3,Fleury S.A.,SA,STOCK
+FLRY3,FLRY3,Fleury S.A.,SA,STOCK
+FLRY9,FLRY3,Fleury S.A.,SA,STOCK
+HGLG11,HGLG11,CSHG Logística FII,SA,REIT
+HGLG12,HGLG11,CSHG Logística FII,SA,REIT
+HGRU11,HGRU11,CSHG Real Estate FII,SA,REIT
+HGRU12,HGRU11,CSHG Real Estate FII,SA,REIT
+IDVY.NL,IDVY,iShares EURO Dividend UCITS ETF,AS,STOCK
+IRDM11,IRDM11,Iridium Recebíveis Imobiliários FII,SA,REIT
+IRDM12,IRDM11,Iridium Recebíveis Imobiliários FII,SA,REIT
+IRIM11,IRIM11,Iridium Recebíveis Imobiliários FII,SA,REIT
+IRIM15,IRIM11,Iridium Recebíveis Imobiliários FII,SA,REIT
+ITSA10,ITSA4,Itaúsa - Investimentos Itaú S.A.,SA,STOCK
+ITSA2,ITSA4,Itaúsa - Investimentos Itaú S.A.,SA,STOCK
+ITSA4,ITSA4,Itaúsa - Investimentos Itaú S.A.,SA,STOCK
+JNJ,JNJ,Johnson & Johnson,,STOCK
+KNRI11,KNRI11,Kinea Rendimentos Imobiliários FII,SA,REIT
+KNRI12,KNRI11,Kinea Rendimentos Imobiliários FII,SA,REIT
+KNUQ11,KNUQ11,Kinea Unique FII,SA,REIT
+KNUQ12,KNUQ11,Kinea Unique FII,SA,REIT
+KO,KO,The Coca-Cola Company,,STOCK
+LDOS,LDOS,Leidos Holdings,,STOCK
+MAIN,MAIN,Main Street Capital Corporation,,REIT
+MCCI11,MCCI11,Mauá Capital Recebíveis Imobiliários FII,SA,REIT
+MCCI12,MCCI11,Mauá Capital Recebíveis Imobiliários FII,SA,REIT
+MNST,MNST,Monster Beverage Corporation,,STOCK
+MSFT,MSFT,Microsoft Corporation,,STOCK
+NVDA,NVDA,NVIDIA Corporation,,STOCK
+O,O,Realty Income Corporation,,REIT
+OUJP11,OUJP11,Ourinvest JPP FII,SA,REIT
+OUJP12,OUJP11,Ourinvest JPP FII,SA,REIT
+OXY,OXY,Occidental Petroleum Corporation,,STOCK
+PFE,PFE,Pfizer Inc.,,STOCK
+PFRM3,PFRM3,Profarma Distribuidora de Produtos Farmacêuticos S.A.,SA,STOCK
+PLTR,PLTR,Palantir Technologies Inc.,,STOCK
+RBRP11,RBRP11,RBR Properties FII,SA,REIT
+RBRP12,RBRP11,RBR Properties FII,SA,REIT
+RECR11,RECR11,REC Recebíveis Imobiliários FII,SA,REIT
+RECR12,RECR11,REC Recebíveis Imobiliários FII,SA,REIT
+SAPR11,SAPR11,Saphyr FII,SA,REIT
+SOJA3,SOJA3,Boa Safra Sementes S.A.,SA,STOCK
+SQIA3,SQIA3,Sinqia S.A.,SA,STOCK
+STBP3,STBP3,Santos Brasil Participações S.A.,SA,STOCK
+SXRV.DE,SXRV,iShares STOXX Europe 600 Basic Resources UCITS ETF,DE,STOCK
+TESOURO IPCA+ COM JUROS SEMESTRAIS 2035,TESOURO IPCA+ COM JUROS SEMESTRAIS 2035,Tesouro IPCA+ com Juros Semestrais 2035,,BOND
+TESOURO SELIC 2025,TESOURO SELIC 2025,Tesouro Selic 2025,,BOND
+TIET11,TIET11,AES Tietê Energia S.A.,SA,REIT
+TTD,TTD,The Trade Desk,,STOCK
+TTE.FR,TTE,TotalEnergies SE,PA,STOCK
+UNIP6,UNIP6,Unipar Carbocloro S.A.,SA,STOCK
+VALE3,VALE3,Vale S.A.,SA,STOCK
+VHYD.UK,VHYD,Vanguard FTSE All-World High Dividend Yield UCITS ETF,L,STOCK
+VIIA3,VIIA3,Via S.A.,SA,STOCK
+VILG11,VILG11,Vinci Logística FII,SA,REIT
+VRTA11,VRTA11,Vectis Renda Residencial FII,SA,REIT
+VRTA12,VRTA11,Vectis Renda Residencial FII,SA,REIT
+VVAR3,VIIA3,Via S.A.,SA,STOCK
+WDP.BE,WDP,Warehouses De Pauw NV,BR,STOCK
+XPLG11,XPLG11,XP Log FII,SA,REIT
+XPLG12,XPLG11,XP Log FII,SA,REIT
+XPML11,XPML11,XP Malls FII,SA,REIT
+XPML12,XPML11,XP Malls FII,SA,REIT

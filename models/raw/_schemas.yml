@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: raw_ticker
+  - name: raw_asset
     description: "Cleaned Portuguese trades data"
     columns:
       - name: symbol

@@ -26,7 +26,7 @@ WITH transform_trades AS (
         tran.LOAD_TS AS LOAD_TS,
         CURRENT_TIMESTAMP()::TIMESTAMP_NTZ AS DBT_UPDATED_AT
     FROM {{ ref('stg_transactions_xtb') }} tran
-    LEFT JOIN {{ ref('dim_ticker') }} tick
+    LEFT JOIN {{ ref('dim_asset') }} tick
         ON tick.original_ticker = tran.ticker
     LEFT JOIN {{ ref('dim_transaction_type') }} trty
         ON trty.transaction_type = tran.transaction_type

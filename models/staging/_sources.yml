@@ -29,13 +29,13 @@ sources:
           error_after: {count: 2, period: day}
         loaded_at_field: LOAD_TS
 
-      - name: raw_ticker_details
-        identifier: raw_ticker_details
-        description: "Stock descriptive information such as field, area of business..."
+      - name: raw_asset_details
+        identifier: RAW_ASSET_DETAILS
+        description: "Asset descriptive information such as field, area of business..."
 
-      - name: raw_ticker_seed
-        identifier: RAW_TICKER_SEED
-        description: "Stock descriptive information manually controlled through dbt seed"
+      - name: raw_asset
+        identifier: RAW_ASSET
+        description: "Asset descriptive information manually controlled through dbt seed"
 
       - name: raw_exchange_rates
         identifier: RAW_EXCHANGE_RATES

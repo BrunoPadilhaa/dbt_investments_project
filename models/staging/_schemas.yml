@@ -49,10 +49,10 @@ models:
             - currency_to
             - rate_date
 
-  - name: stg_ticker_xtb
-    description: "Cleaned stock information"
+  - name: stg_asset
+    description: "Cleaned asset information"
     columns:
-      - name: ticker
-        description: "Symbol for the stock"
+      - name: asset_code
+        description: "Asset code"
         tests:
           - not_null

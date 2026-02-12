@@ -24,7 +24,7 @@ WITH t_stock_prices AS (
     FROM {{ref('stg_stock_prices')}} STPR
 
     LEFT
-    JOIN {{ref('dim_ticker')}} TICK
+    JOIN {{ref('dim_asset')}} TICK
     ON TICK.ORIGINAL_TICKER = STPR.TICKER
 
     LEFT JOIN {{ ref('dim_currency') }} curr
