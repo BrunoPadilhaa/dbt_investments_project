@@ -2,6 +2,7 @@
     config(
         materialized = 'incremental'
     ,   unique_key = ['CURRENCY_FROM', 'CURRENCY_FROM', 'RATE_DATE']
+    ,   incremental_strategy = 'merge'
     ,   on_schema_change = 'fail'
     )
 

@@ -68,8 +68,8 @@ asset_map_query = f"""
         ASSET_CODE,
         CASE 
             WHEN CODE_SUFFIX IS NOT NULL AND CODE_SUFFIX != '' 
-            THEN ASSET_CODE_CURRENT || '.' || CODE_SUFFIX
-            ELSE ASSET_CODE_CURRENT
+            THEN ASSET_CODE || '.' || CODE_SUFFIX
+            ELSE ASSET_CODE
         END AS YF_ASSET_CODE
     FROM {SCHEMA}.{RAW_ASSET_SEED_TABLE}
 """

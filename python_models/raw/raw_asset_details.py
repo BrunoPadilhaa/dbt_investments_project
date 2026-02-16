@@ -7,7 +7,6 @@ from snowflake.connector.pandas_tools import write_pandas
 import os
 import requests
 from typing import Optional, Dict
-import pycountry
 from dotenv import load_dotenv
 
 # --- Load environment variables from .env file ---
@@ -30,18 +29,6 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # --- Helper functions ---
-
-def get_country_name(country_code: Optional[str]) -> Optional[str]:
-    """Convert country code to country name using pycountry."""
-    if not country_code:
-        return None
-    
-    try:
-        country = pycountry.countries.get(alpha_2=country_code.strip().upper())
-        return country.name if country else None
-    except Exception as e:
-        logger.warning(f"⚠️ Could not resolve country code '{country_code}': {e}")
-        return None
 
 def is_valid_asset_code(symbol: str) -> bool:
     """Check if the asset code is valid on Yahoo Finance."""
@@ -112,31 +99,30 @@ def build_yahoo_asset_code(asset_code_current: str, code_suffix: str) -> str:
     
     return f"{asset_code_current}.{code_suffix}"
 
-def fetch_asset_info(asset_code: str, yf_asset_code: Optional[str], country_code: Optional[str]) -> Dict:
+def fetch_asset_info(asset_code: str, yf_asset_code: Optional[str]) -> Dict:
     """Fetch asset information from Yahoo Finance."""
     now_ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-    # Convert country code to country name
-    country_name = get_country_name(country_code)
 
     source_system = "yahoo_finance"
 
     record = {
         "ASSET_CODE": asset_code,
         "YF_ASSET_CODE": yf_asset_code,
-        "COUNTRY": country_name,
         "SOURCE_SYSTEM": source_system,
         "LOAD_TS": now_ts
     }
 
     if not yf_asset_code:
         logger.error(f"❌ UNRESOLVED YAHOO ASSET CODE FOR {asset_code}")
-        for col in ["SHORTNAME", "LONGNAME", "QUOTETYPE", "SECTOR", "INDUSTRY", "CURRENCY", "EXCHANGE"]:
+        for col in ["SHORTNAME", "LONGNAME", "QUOTETYPE", "SECTOR", "INDUSTRY", "CURRENCY", "EXCHANGE", "COUNTRY"]:
             record[col] = None
         return record
 
     try:
         info = yf.Ticker(yf_asset_code).info
+
+        # Try multiple fields for country information - simple fallback
+        country = info.get("country") or info.get("domicile") or info.get("fundCountry")
 
         record.update({
             "SHORTNAME": info.get("shortName"),
@@ -145,14 +131,15 @@ def fetch_asset_info(asset_code: str, yf_asset_code: Optional[str], country_code
             "SECTOR": info.get("sector"),
             "INDUSTRY": info.get("industry"),
             "CURRENCY": info.get("currency"),
-            "EXCHANGE": info.get("exchange")
+            "EXCHANGE": info.get("exchange"),
+            "COUNTRY": country
         })
 
-        logger.info(f"✅ Fetched info for {asset_code} -> {yf_asset_code} ({country_name})")
+        logger.info(f"✅ Fetched info for {asset_code} -> {yf_asset_code} (Country: {country}, Type: {info.get('quoteType')})")
 
     except Exception as e:
         logger.error(f"❌ Failed fetching info for {asset_code}: {e}")
-        for col in ["SHORTNAME", "LONGNAME", "QUOTETYPE", "SECTOR", "INDUSTRY", "CURRENCY", "EXCHANGE"]:
+        for col in ["SHORTNAME", "LONGNAME", "QUOTETYPE", "SECTOR", "INDUSTRY", "CURRENCY", "EXCHANGE", "COUNTRY"]:
             record[col] = None
 
     return record
@@ -182,8 +169,7 @@ def main():
             SELECT DISTINCT
                 ASSET_CODE,
                 ASSET_CODE_CURRENT,
-                CODE_SUFFIX,
-                COUNTRY_CODE
+                CODE_SUFFIX
             FROM {SCHEMA}.{RAW_ASSET_SEED_TABLE}
             WHERE ASSET_CODE_CURRENT IS NOT NULL
         """)
@@ -193,14 +179,13 @@ def main():
 
         all_data = []
 
-        for asset_code, asset_code_current, code_suffix, country_code in rows:
+        for asset_code, asset_code_current, code_suffix in rows:
             yahoo_candidate = build_yahoo_asset_code(asset_code_current, code_suffix)
             yf_asset_code = find_yahoo_asset_code(yahoo_candidate)
 
             record = fetch_asset_info(
                 asset_code=asset_code,
-                yf_asset_code=yf_asset_code,
-                country_code=country_code
+                yf_asset_code=yf_asset_code
             )
 
             all_data.append(record)

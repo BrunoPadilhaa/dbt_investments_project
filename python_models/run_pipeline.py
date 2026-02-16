@@ -11,16 +11,15 @@ from pathlib import Path
 warnings.filterwarnings('ignore', category=UserWarning)
 
 # Script directory
-SCRIPT_DIR = Path(__file__).parent / "raw_ingestion"
+SCRIPT_DIR = Path(__file__).parent / "raw"
 
 # Loaders in order
 LOADERS = [
     "raw_exchange_rates.py",
-    "raw_stock_prices.py",
-    "ingest_raw_transactions_clear.py",
+    "raw_asset_prices.py",
+    "raw_transactions_clear.py",
     "raw_transactions_xtb.py",
-    "raw_ticker_details.py",
-    "country_mapping.py"
+    "raw_asset_details.py"
 
 ]
 

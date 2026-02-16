@@ -2,6 +2,7 @@
     config(
         materialized = 'incremental'
     ,   unique_key = ['ASSET_CODE','PRICE_DATE']
+    ,   incremental_strategy = 'merge'
     ,   on_schema_change = 'fail'
     )
 }}

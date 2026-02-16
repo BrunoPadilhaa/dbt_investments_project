@@ -1,11 +1,19 @@
+{{
+    config(
+        materialized = 'incremental',
+        unique_key = 'TRANSACTION_ID',
+        incremental_strategy = 'merge'
+    )
+}}
+
 WITH transform_trades AS (
     SELECT
         tran.TRANSACTION_ID,
         CAST(REPLACE(CAST(tran.TRANSACTION_TIME AS DATE),'-','') AS INT) AS TRANSACTION_DATE_ID,
         trty.transaction_type_id,
-        tick.ticker_id,
+        asse.asset_id   ,
         CASE
-            WHEN TICK.INVESTMENT_REGION = 'BRAZIL' THEN 'BRL'
+            WHEN asse.INVESTMENT_COUNTRY = 'BRAZIL' THEN 'BRL'
             ELSE 'EUR'
         END AS CURRENCY_ABRV,
         CASE
@@ -26,10 +34,15 @@ WITH transform_trades AS (
         tran.LOAD_TS AS LOAD_TS,
         CURRENT_TIMESTAMP()::TIMESTAMP_NTZ AS DBT_UPDATED_AT
     FROM {{ ref('stg_transactions_xtb') }} tran
-    LEFT JOIN {{ ref('dim_asset') }} tick
-        ON tick.original_ticker = tran.ticker
+    LEFT JOIN {{ ref('dim_asset') }} asse
+        ON asse.asset_code = tran.asset_code
     LEFT JOIN {{ ref('dim_transaction_type') }} trty
         ON trty.transaction_type = tran.transaction_type
+
+     {% if is_incremental() %}
+        WHERE tran.LOAD_TS > (SELECT COALESCE(MAX(LOAD_TS), '1900-01-01'::TIMESTAMP_NTZ) FROM {{ this }})
+    {% endif %}
+
 
 )
 
@@ -38,7 +51,7 @@ WITH transform_trades AS (
         TRTR.TRANSACTION_ID, 
         TRTR.TRANSACTION_DATE_ID, 
         TRTR.TRANSACTION_TYPE_ID, 
-        TRTR.TICKER_ID, 
+        TRTR.ASSET_ID, 
         CURR.CURRENCY_ID, 
         CASE 
             WHEN TRTR.TRANSACTION_TYPE_ID = 'Stock Sale' THEN TRTR.QUANTITY * -1 --sold 

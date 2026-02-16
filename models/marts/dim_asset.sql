@@ -12,7 +12,12 @@ WITH CTE_ASSET AS (
         ASSE.ASSET_CODE,
         ASSE.ASSET_CODE_CURRENT,
         ASSE.ASSET_NAME,
-        ASDE.ASSET_COUNTRY,
+        CASE 
+            WHEN ASDE.EXCHANGE = 'LSE' THEN 'England'
+            WHEN ASDE.EXCHANGE = 'GER' THEN 'Germany'
+            WHEN ASDE.EXCHANGE = 'AMS' THEN 'Netherlands' 
+            ELSE ASDE.ASSET_COUNTRY
+        END AS ASSET_COUNTRY,
         CASE 
             WHEN ASDE.ASSET_COUNTRY = 'Brazil' THEN 'Brazil'
             ELSE 'Portugal'
