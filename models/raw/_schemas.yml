@@ -4,7 +4,7 @@ models:
   - name: raw_asset
     description: "Cleaned Portuguese trades data"
     columns:
-      - name: symbol
+      - name: asset_code
         description: "Unique identifier for each trade"
         tests:
           - unique

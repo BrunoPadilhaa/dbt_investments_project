@@ -22,31 +22,70 @@
 */
 
 -- Get all calendar dates up to yesterday (ensures complete price/rate data availability)
+
+/*
+    DATA QUALITY & KEY MANAGEMENT CONSIDERATIONS
+    
+    CURRENT STATE:
+    - transaction_id is currently unique in fct_transactions (XTB broker only)
+    - transaction_id serves as the primary key for XTB transactions
+    
+    FUTURE CHALLENGE - MULTI-BROKER SUPPORT:
+    When integrating additional brokers (e.g., Clear Broker), we face a key collision risk:
+    - XTB transaction_ids and Clear Broker transaction_ids may overlap
+    - transaction_id alone cannot serve as a unique identifier across multiple sources
+    
+    PROPOSED SOLUTION:
+    Implement a composite key or generate a surrogate key:
+    Option 1: Composite Key (broker_id + transaction_id)
+    Option 2: Hash Key (MD5/SHA of broker_id + transaction_id + transaction_date)
+    Option 3: Surrogate Key (auto-incrementing warehouse-generated ID)
+    
+    REAL-WORLD EXAMPLE - BROKER TRANSACTION SPLITTING:
+    Asset: IDVY
+    Date: 2024-09-30
+    Scenario: Single trade split into 3 separate transactions by broker
+    
+    What we see in source system:
+    - 3 rows with identical date, price, and amount
+    - 3 different transaction_ids (broker-assigned)
+    - This is CORRECT behavior - broker executes large orders in batches
+    
+    Why this matters:
+    - Each split transaction has a unique ID in the broker's system
+    - We must preserve all 3 records to maintain audit trail
+    - Deduplication based on date/price/amount would be INCORRECT
+    
+    ACTION REQUIRED:
+    Before adding new broker sources, implement a universal transaction key strategy
+    to prevent ID conflicts and maintain data integrity across all sources.
+*/
+
 WITH calendar AS (
     SELECT
         date_id
-    FROM INVESTMENTS.PROD.dim_date
+    FROM {{ ref('dim_date') }}
     WHERE DATE_ID <= TO_NUMBER(TO_CHAR(current_date, 'YYYYMMDD'))-1
 )
 
--- Create spine: every ticker for every date
+-- Create spine: every asset for every date
 -- This ensures we have rows even on days with no trades, allowing cumulative calculations
-, ticker_date_spine AS (
+, asset_date_spine AS (
     SELECT 
         cale.date_id
-    ,   tick.ticker_id
-    ,   tick.original_ticker
+    ,   asse.asset_id
+    ,   asse.asset_code
     FROM calendar cale
-    CROSS JOIN INVESTMENTS.PROD.dim_ticker tick
+    CROSS JOIN {{ ref('dim_asset') }} asse
 )
 
--- Get distinct ticker-currency combinations from stock prices
--- Needed to know which currency each ticker's prices are denominated in
-, stock_price_currency_ticker AS (
+-- Get distinct asset-currency combinations from asset prices
+-- Needed to know which currency each asset's prices are denominated in
+, asset_price_currency_asset AS (
     SELECT DISTINCT 
-        ticker_id
+        asset_id
     ,   price_currency_id
-    FROM INVESTMENTS.PROD.fct_stock_prices
+    FROM {{ ref('fct_asset_prices') }}
 )
 
 -- Get all distinct currency pairs that exist in our exchange rate data
@@ -54,7 +93,7 @@ WITH calendar AS (
     SELECT DISTINCT
         currency_id_from, 
         currency_id_to
-    FROM INVESTMENTS.PROD.fct_exchange_rates
+    FROM {{ ref('fct_exchange_rates') }}
 )
 
 -- Create spine: every currency pair for every date
@@ -93,8 +132,8 @@ WITH calendar AS (
                 WHEN curr.currency_abrv = 'EUR' THEN 1 
                 ELSE exra.exchange_rate
             END AS exchange_rate
-        FROM prod.fct_exchange_rates exra
-        LEFT JOIN prod.dim_currency curr
+        FROM {{ ref('fct_exchange_rates') }} exra
+        LEFT JOIN {{ ref('dim_currency') }} curr
             ON curr.currency_id = exra.currency_id_from
     ) exra
         ON exra.rate_date_id = ersp.date_id
@@ -102,49 +141,49 @@ WITH calendar AS (
         AND exra.currency_id_to = ersp.currency_id_to
 )
 
--- Create spine: every ticker for every date with its price currency
-, stock_prices_spine AS (
+-- Create spine: every asset for every date with its price currency
+, asset_prices_spine AS (
     SELECT
         cale.date_id
-    ,   spct.ticker_id
+    ,   spct.asset_id
     ,   spct.price_currency_id
     FROM calendar cale
-    CROSS JOIN stock_price_currency_ticker spct
+    CROSS JOIN asset_price_currency_asset spct
 )
 
--- Forward-fill stock prices to cover weekends and holidays
+-- Forward-fill asset prices to cover weekends and holidays
 -- Uses most recent closing price when markets are closed
-, stock_prices_filled AS (
+, asset_prices_filled AS (
     SELECT 
         spsp.date_id AS price_date_id
-    ,   spsp.ticker_id
+    ,   spsp.asset_id
     ,   spsp.price_currency_id
     ,   stpr.price_adj_close
     ,   LAST_VALUE(stpr.price_adj_close IGNORE NULLS) OVER (
-            PARTITION BY spsp.ticker_id 
+            PARTITION BY spsp.asset_id 
             ORDER BY spsp.date_id 
             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
         ) AS price_adj_close_filled
-    FROM stock_prices_spine spsp
-    LEFT JOIN INVESTMENTS.PROD.fct_stock_prices stpr
+    FROM asset_prices_spine spsp
+    LEFT JOIN {{ ref('fct_asset_prices') }} stpr
         ON stpr.price_date_id = spsp.date_id
-        AND stpr.ticker_id = spsp.ticker_id
+        AND stpr.asset_id = spsp.asset_id
 )
 
--- Enrich stock prices with ticker and currency metadata
+-- Enrich asset prices with asset and currency metadata
 -- Price remains in native currency at this stage (USD, BRL, EUR, etc.)
-, stock_prices AS (
+, asset_prices AS (
     SELECT 
         stpr.price_date_id
-    ,   tick.ticker_id
+    ,   asse.asset_id
     ,   stpr.price_currency_id
     ,   curr.currency_abrv
-    ,   tick.original_ticker
+    ,   asse.asset_code
     ,   stpr.price_adj_close_filled
-    FROM stock_prices_filled stpr
-    LEFT JOIN INVESTMENTS.PROD.dim_ticker tick
-        ON tick.ticker_id = stpr.ticker_id
-    LEFT JOIN INVESTMENTS.PROD.dim_currency curr
+    FROM asset_prices_filled stpr
+    LEFT JOIN {{ ref('dim_asset') }} asse
+        ON asse.asset_id = stpr.asset_id
+    LEFT JOIN {{ ref('dim_currency') }} curr
         ON curr.currency_id = stpr.price_currency_id
 )
 
@@ -154,30 +193,30 @@ WITH calendar AS (
 , trades AS (
     SELECT 
         tran.transaction_date_id
-    ,   tick.ticker_id
-    ,   tick.ticker
+    ,   asse.asset_id
+    ,   asse.asset_code     
     ,   trty.transaction_type
     ,   CASE
             WHEN trty.transaction_type = 'Stock Sale' THEN tran.quantity * -1 
             ELSE tran.quantity
         END AS quantity
     ,   tran.amount * -1 AS amount  -- Negative = money out (purchase), positive = money in (sale)
-    FROM INVESTMENTS.PROD.fct_transactions tran
-    LEFT JOIN INVESTMENTS.PROD.dim_ticker tick
-        ON tick.ticker_id = tran.ticker_id
-    LEFT JOIN INVESTMENTS.PROD.dim_transaction_type trty
+    FROM {{ ref('fct_transactions') }} tran
+    LEFT JOIN {{ ref('dim_asset') }} asse
+        ON asse.asset_id = tran.asset_id
+    LEFT JOIN {{ ref('dim_transaction_type') }} trty
         ON trty.transaction_type_id = tran.transaction_type_id
     WHERE trty.transaction_type IN ('Stock Purchase','Stock Sale')
 )
 
--- Filter to only tickers with current holdings (net position > 0)
--- Excludes tickers that have been completely sold out
+-- Filter to only assets with current holdings (net position > 0)
+-- Excludes assets that have been completely sold out
 , opened_positions AS (
     SELECT 
-        ticker_id
+        asset_id
     ,   SUM(quantity) as total_quantity
     FROM trades
-    GROUP BY ticker_id, ticker
+    GROUP BY asset_id
     HAVING SUM(quantity) > 0
 )
 
@@ -185,20 +224,20 @@ WITH calendar AS (
 , daily_snapshot AS (
     SELECT 
         tida.date_id
-    ,   tida.ticker_id
+    ,   tida.asset_id
     ,   trad.quantity  -- Shares traded today (NULL if no trade)
     ,   trad.amount    -- Money invested/divested today (NULL if no trade)
     ,   stpr.price_currency_id
     
         -- Running total of shares owned from inception to this date
     ,   SUM(COALESCE(trad.quantity, 0)) OVER (
-            PARTITION BY tida.ticker_id 
+            PARTITION BY tida.asset_id 
             ORDER BY tida.date_id
         ) AS quantity_cumulative
     
         -- Running total of capital deployed from inception to this date
     ,   SUM(COALESCE(trad.amount, 0)) OVER (
-            PARTITION BY tida.ticker_id 
+            PARTITION BY tida.asset_id 
             ORDER BY tida.date_id
         ) AS amount_invested_cumulative
     
@@ -208,21 +247,21 @@ WITH calendar AS (
             AS DECIMAL(10,2)
         ) AS portfolio_value_eur
     
-    FROM ticker_date_spine tida
+    FROM asset_date_spine tida
     
-    -- Only include tickers we currently own
+    -- Only include assets we currently own
     INNER JOIN opened_positions oppo
-        ON oppo.ticker_id = tida.ticker_id
+        ON oppo.asset_id = tida.asset_id
     
     -- Bring in actual trades (most dates will be NULL - no trading activity)
     LEFT JOIN trades trad
         ON trad.transaction_date_id = tida.date_id
-        AND trad.ticker_id = tida.ticker_id
+        AND trad.asset_id = tida.asset_id
     
-    -- Get forward-filled stock price in native currency
-    LEFT JOIN stock_prices stpr
+    -- Get forward-filled asset price in native currency
+    LEFT JOIN asset_prices stpr
         ON stpr.price_date_id = tida.date_id
-        AND stpr.ticker_id = tida.ticker_id
+        AND stpr.asset_id = tida.asset_id
     
     -- Get forward-filled exchange rate to convert to EUR
     LEFT JOIN exchange_rates exra
