@@ -40,3 +40,7 @@ Thumbs.db
 # Misc
 # ----------------------------
 *.log
+
+
+# Snowflake credentials
+config/.env
