@@ -1,5 +1,5 @@
 ﻿ASSET_CODE,ASSET_CODE_CURRENT,ASSET_NAME,CODE_SUFFIX,ASSET_TYPE
-4GLD,4GLD,Xetra-Gold,DE,STOCK
+4GLD,4GLD,Xetra-Gold,DE,COMMODITIES
 A7RN11,A7RN11,A7RN FII,SA,REIT
 A7RN3,A7RN3,A7RN Participações,SA,STOCK
 AAPL,AAPL,Apple Inc.,,STOCK
@@ -9,7 +9,7 @@ AESB3,AESB3,AES Brasil Energia S.A.,SA,STOCK
 ALUP11,ALUP11,Aliança Trust Renda Imobiliária FII,SA,REIT
 ALZR11,ALZR11,Alianza Trust Renda Imobiliária FII,SA,REIT
 ALZR12,ALZR11,Alianza Trust Renda Imobiliária FII,SA,REIT
-ARCC,ARCC,Ares Capital Corporation,,REIT
+ARCC,ARCC,Ares Capital Corporation,,STOCK
 AURE3,AURE3,Auren Energia S.A.,SA,STOCK
 BBAS3,BBAS3,Banco do Brasil S.A.,SA,STOCK
 BBSE3,BBSE3,BB Seguridade Participações S.A.,SA,STOCK
@@ -25,7 +25,7 @@ CVCB1,CVCB3,CVC Brasil Operadora e Agência de Viagens S.A.,SA,STOCK
 CVCB3,CVCB3,CVC Brasil Operadora e Agência de Viagens S.A.,SA,STOCK
 ENBR3,ENBR3,EDP - Energias do Brasil S.A.,SA,STOCK
 ENEL,ENEL,Enel S.p.A.,IT,STOCK
-EUNA,EUNA,Encavis AG,DE,STOCK
+EUNA,EUNA,Encavis AG,DE,ETF
 EVEN3,EVEN3,Even Construtora e Incorporadora S.A.,SA,STOCK
 FLRY1,FLRY3,Fleury S.A.,SA,STOCK
 FLRY3,FLRY3,Fleury S.A.,SA,STOCK
@@ -34,7 +34,7 @@ HGLG11,HGLG11,CSHG Logística FII,SA,REIT
 HGLG12,HGLG11,CSHG Logística FII,SA,REIT
 HGRU11,HGRU11,CSHG Real Estate FII,SA,REIT
 HGRU12,HGRU11,CSHG Real Estate FII,SA,REIT
-IDVY,IDVY,iShares EURO Dividend UCITS ETF,AS,STOCK
+IDVY,IDVY,iShares EURO Dividend UCITS ETF,AS,ETF
 IRDM11,IRDM11,Iridium Recebíveis Imobiliários FII,SA,REIT
 IRDM12,IRDM11,Iridium Recebíveis Imobiliários FII,SA,REIT
 IRIM11,IRIM11,Iridium Recebíveis Imobiliários FII,SA,REIT
@@ -49,7 +49,7 @@ KNUQ11,KNUQ11,Kinea Unique FII,SA,REIT
 KNUQ12,KNUQ11,Kinea Unique FII,SA,REIT
 KO,KO,The Coca-Cola Company,,STOCK
 LDOS,LDOS,Leidos Holdings,,STOCK
-MAIN,MAIN,Main Street Capital Corporation,,REIT
+MAIN,MAIN,Main Street Capital Corporation,,STOCK
 MCCI11,MCCI11,Mauá Capital Recebíveis Imobiliários FII,SA,REIT
 MCCI12,MCCI11,Mauá Capital Recebíveis Imobiliários FII,SA,REIT
 MNST,MNST,Monster Beverage Corporation,,STOCK
@@ -70,15 +70,15 @@ SAPR11,SAPR11,Saphyr FII,SA,REIT
 SOJA3,SOJA3,Boa Safra Sementes S.A.,SA,STOCK
 SQIA3,SQIA3,Sinqia S.A.,SA,STOCK
 STBP3,STBP3,Santos Brasil Participações S.A.,SA,STOCK
-SXRV,SXRV,iShares STOXX Europe 600 Basic Resources UCITS ETF,DE,STOCK
+SXRV,SXRV,iShares STOXX Europe 600 Basic Resources UCITS ETF,DE,ETF
 TESOURO IPCA+ COM JUROS SEMESTRAIS 2035,TESOURO IPCA+ COM JUROS SEMESTRAIS 2035,Tesouro IPCA+ com Juros Semestrais 2035,,BOND
 TESOURO SELIC 2025,TESOURO SELIC 2025,Tesouro Selic 2025,,BOND
-TIET11,TIET11,AES Tietê Energia S.A.,SA,REIT
+TIET11,TIET11,AES Tietê Energia S.A.,SA,STOCK
 TTD,TTD,The Trade Desk,,STOCK
 TTE,TTE,TotalEnergies SE,PA,STOCK
 UNIP6,UNIP6,Unipar Carbocloro S.A.,SA,STOCK
 VALE3,VALE3,Vale S.A.,SA,STOCK
-VHYD,VHYD,Vanguard FTSE All-World High Dividend Yield UCITS ETF,L,STOCK
+VHYD,VHYD,Vanguard FTSE All-World High Dividend Yield UCITS ETF,L,ETF
 VIIA3,VIIA3,Via S.A.,SA,STOCK
 VILG11,VILG11,Vinci Logística FII,SA,REIT
 VRTA11,VRTA11,Vectis Renda Residencial FII,SA,REIT
@@ -89,3 +89,4 @@ XPLG11,XPLG11,XP Log FII,SA,REIT
 XPLG12,XPLG11,XP Log FII,SA,REIT
 XPML11,XPML11,XP Malls FII,SA,REIT
 XPML12,XPML11,XP Malls FII,SA,REIT
+VWCE,VWCE,Vanguard FTSE All-World,DE,ETF

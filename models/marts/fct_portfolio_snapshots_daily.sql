@@ -196,17 +196,19 @@ WITH calendar AS (
     ,   asse.asset_id
     ,   asse.asset_code     
     ,   trty.transaction_type
-    ,   CASE
+    ,   SUM(CASE
             WHEN trty.transaction_type = 'Stock Sale' THEN tran.quantity * -1 
             ELSE tran.quantity
-        END AS quantity
-    ,   tran.amount * -1 AS amount  -- Negative = money out (purchase), positive = money in (sale)
+        END) AS quantity
+    ,   SUM(tran.amount) * -1 AS amount  -- Negative = money out (purchase), positive = money in (sale)
     FROM {{ ref('fct_transactions') }} tran
     LEFT JOIN {{ ref('dim_asset') }} asse
         ON asse.asset_id = tran.asset_id
     LEFT JOIN {{ ref('dim_transaction_type') }} trty
         ON trty.transaction_type_id = tran.transaction_type_id
     WHERE trty.transaction_type IN ('Stock Purchase','Stock Sale')
+
+    GROUP BY ALL
 )
 
 -- Filter to only assets with current holdings (net position > 0)
@@ -269,4 +271,4 @@ WITH calendar AS (
         AND exra.currency_id_from = stpr.price_currency_id
 )
 
-SELECT * FROM daily_snapshot WHERE date_id >= 20250101
+SELECT * FROM daily_snapshot WHERE portfolio_value_eur > 0

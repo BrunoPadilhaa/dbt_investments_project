@@ -9,6 +9,15 @@ models:
         tests:
           - unique
           - not_null
+    
+  - name: stg_transactions_clear
+    description: "Cleaned transactions data with duplicates removed"
+    columns:
+      - name: transaction_id
+        description: "Unique identifier for each trade"
+        tests:
+          - unique
+          - not_null
 
   - name: stg_stock_prices
     description: "Cleaned daily stock prices"
@@ -56,3 +65,5 @@ models:
         description: "Asset code"
         tests:
           - not_null
+
+  

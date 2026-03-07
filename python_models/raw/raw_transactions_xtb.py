@@ -32,7 +32,7 @@ cs.execute(f"TRUNCATE TABLE {DATABASE}.{SCHEMA}.{RAW_TABLE}")
 print(f"Table {RAW_TABLE} truncated successfully")
 
 # --- Folder containing Excel files ---
-file_path = r"C:\Users\bruno\Documents\dbt_projects\dataset\Portugal\\"
+file_path = r"C:\Users\bruno\Documents\dbt_projects\dataset\Portugal\xtb\\"
 # --- Fetch already loaded files from Snowflake ---
 all_dfs = []
 # --- Walk through all subfolders and Excel files ---
