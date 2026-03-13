@@ -12,6 +12,20 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 RAW_EXCHANGE_TABLE = "RAW_EXCHANGE_RATES"
 
 
+import yfinance as yf
+from datetime import datetime, timedelta
+import logging
+import pandas as pd
+
+from ingestion.snowflake_connection import get_connection  # shared connector
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
+# --- Table ---
+RAW_EXCHANGE_TABLE = "RAW_EXCHANGE_RATES"
+
+
 def load_exchange_rates():
     """Fetch daily exchange rates from Yahoo Finance and load into Snowflake."""
     ctx = get_connection()
@@ -25,22 +39,11 @@ def load_exchange_rates():
         start_date = datetime(2024, 1, 1).date()
         logger.info("Table is empty. Fetching from 2024-01-01")
     else:
-        start_date = max_date_result + timedelta(days=1)
+        start_date = max_date_result  # re-fetch last date too, in case it was partial
         logger.info(f"Last loaded date: {max_date_result}. Fetching from: {start_date}")
 
     end_date = datetime.now().date()
     logger.info(f"Date range: {start_date} to {end_date}")
-
-    # --- Existing currency/date pairs to avoid duplicates ---
-    if max_date_result:
-        cs.execute(
-            f"SELECT CURRENCY_FROM, CURRENCY_TO, RATE_DATE FROM RAW.{RAW_EXCHANGE_TABLE} WHERE RATE_DATE >= %s",
-            (start_date,)
-        )
-        existing_rows = cs.fetchall()
-        existing_set = set((row[0], row[1], row[2]) for row in existing_rows)
-    else:
-        existing_set = set()
 
     # --- Currency pairs ---
     currency_pairs = [
@@ -61,28 +64,28 @@ def load_exchange_rates():
                 logger.warning(f"No data for {yf_ticker}")
                 continue
 
-            rows_added = 0
             for dt, row in data.iterrows():
-                rate_date = dt.date()
-                if (from_cur, to_cur, rate_date) in existing_set:
-                    continue
-                record = {
+                all_data.append({
                     "CURRENCY_FROM": from_cur,
                     "CURRENCY_TO": to_cur,
-                    "RATE_DATE": rate_date,
+                    "RATE_DATE": dt.date(),
                     "EXCHANGE_RATE": round(row["Close"], 6),
                     "SOURCE_SYSTEM": "yahoo finance"
-                }
-                all_data.append(record)
-                rows_added += 1
+                })
 
-            logger.info(f"Retrieved {rows_added} new rows for {from_cur}/{to_cur}")
+            logger.info(f"Retrieved {len(data)} rows for {from_cur}/{to_cur}")
 
         except Exception as e:
             logger.error(f"Failed fetching {yf_ticker}: {e}")
 
-    # --- Load into Snowflake ---
+    # --- Delete date range before inserting (idempotent) ---
     if all_data:
+        logger.info(f"Deleting existing data from {start_date} to {end_date} before reload")
+        cs.execute(
+            f"DELETE FROM RAW.{RAW_EXCHANGE_TABLE} WHERE RATE_DATE BETWEEN %s AND %s",
+            (start_date, end_date)
+        )
+
         df = pd.DataFrame(all_data).reset_index(drop=True)
         from snowflake.connector.pandas_tools import write_pandas
         success, nchunks, nrows, _ = write_pandas(ctx, df, RAW_EXCHANGE_TABLE, schema="RAW")
