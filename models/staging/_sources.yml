@@ -33,7 +33,7 @@ sources:
         identifier: RAW_ASSET_DETAILS
         description: "Asset descriptive information such as field, area of business..."
 
-      - name: raw_asset
+      - name: raw_asset_seed
         identifier: RAW_ASSET
         description: "Asset descriptive information manually controlled through dbt seed"
 
