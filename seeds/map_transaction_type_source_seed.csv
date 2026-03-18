@@ -1,0 +1,38 @@
+﻿source_transaction_type,transaction_type_code,source_system
+Stock Purchase,BUY,xtb_portugal
+Stock Sale,SELL,xtb_portugal
+Close Trade,SELL,xtb_portugal
+Divident,INCOME,xtb_portugal
+Free-Funds Interest,INCOME,xtb_portugal
+Tax IFTT,TAX,xtb_portugal
+Free-Funds Interest Tax,TAX,xtb_portugal
+Withholding Tax,TAX,xtb_portugal
+Sec Fee,FEE,xtb_portugal
+Deposit,CASH_TRANSFER,xtb_portugal
+Correction,CORPORATE_ACTION,xtb_portugal
+Compra,BUY,clear
+Solicitação de Subscrição,BUY,clear
+Direitos de Subscrição - Exercido,BUY,clear
+Direitos de Subscrição - Excercído,BUY,clear
+Recibo de Subscrição,BUY,clear
+Venda,SELL,clear
+Leilão de Fração,SELL,clear
+Resgate,SELL,clear
+Dividendo,INCOME,clear
+Rendimento,INCOME,clear
+Juros,INCOME,clear
+Juros Sobre Capital Próprio,INCOME,clear
+Juros Sobre Capital Próprio - Transferido,INCOME,clear
+Transferência,CASH_TRANSFER,clear
+Bonificação em Ativos,CORPORATE_ACTION,clear
+Desdobro,CORPORATE_ACTION,clear
+Grupamento,CORPORATE_ACTION,clear
+Incorporação,CORPORATE_ACTION,clear
+Atualização,CORPORATE_ACTION,clear
+Fração em Ativos,CORPORATE_ACTION,clear
+Direito de Subscrição,CORPORATE_ACTION,clear
+Direito Sobras de Subscrição,CORPORATE_ACTION,clear
+Direito Sobras de Subscrição - Não Exercido,CORPORATE_ACTION,clear
+Cessão de Direitos,CORPORATE_ACTION,clear
+Cessão de Direitos - Solicitada,CORPORATE_ACTION,clear
+Direitos de Subscrição - Não Exercido,CORPORATE_ACTION,clear

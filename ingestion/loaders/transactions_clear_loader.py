@@ -58,7 +58,7 @@ def load_clear_transactions():
 
                     # Add tracking columns
                     df['SOURCE_FILE'] = filename
-                    df['SOURCE_SYSTEM'] = 'xp_investimentos'
+                    df['SOURCE_SYSTEM'] = 'clear'
                     df['LOAD_TS'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
                     all_dfs.append(df)
