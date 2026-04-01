@@ -46,17 +46,20 @@ def load_asset_prices(ctx):
     asset_map_query = f"""
         SELECT 
             TRIM(ASSET_CODE) AS ASSET_CODE,
-            TRIM(ASSET_CODE_YAHOO_FINANCE) AS YF_ASSET_CODE
+            TRIM(ASSET_CODE_SYSTEM) AS ASSET_CODE_SYSTEM
         FROM RAW.{RAW_ASSET_SEED_TABLE}
-        WHERE ASSET_CODE_YAHOO_FINANCE IS NOT NULL
+        WHERE ASSET_CODE_SYSTEM IS NOT NULL
     """
 
     asset_map_df = pd.read_sql(asset_map_query, ctx)
 
-    asset_map_df["ASSET_CODE"] = asset_map_df["ASSET_CODE"].str.replace(r"\s+", "", regex=True)
-    asset_map_df["YF_ASSET_CODE"] = asset_map_df["YF_ASSET_CODE"].str.replace(r"\s+", "", regex=True)
+    # Normalize columns to uppercase to avoid casing issues
+    asset_map_df.columns = asset_map_df.columns.str.upper()
 
-    asset_mapping = dict(zip(asset_map_df["ASSET_CODE"], asset_map_df["YF_ASSET_CODE"]))
+    asset_map_df["ASSET_CODE"] = asset_map_df["ASSET_CODE"].str.replace(r"\s+", "", regex=True)
+    asset_map_df["ASSET_CODE_SYSTEM"] = asset_map_df["ASSET_CODE_SYSTEM"].str.replace(r"\s+", "", regex=True)
+
+    asset_mapping = dict(zip(asset_map_df["ASSET_CODE"], asset_map_df["ASSET_CODE_SYSTEM"]))
     asset_codes = asset_map_df["ASSET_CODE"].tolist()
 
     logger.info(f"Loaded {len(asset_mapping)} assets from {RAW_ASSET_SEED_TABLE}")
@@ -68,7 +71,7 @@ def load_asset_prices(ctx):
 
     for asset_code in asset_codes:
 
-        yf_asset_code = asset_mapping.get(asset_code)
+        sys_asset_code = asset_mapping.get(asset_code)
 
         try:
 
@@ -79,9 +82,9 @@ def load_asset_prices(ctx):
 
             start_date = max_date + timedelta(days=1)
 
-            logger.info(f"Fetching {asset_code} -> {yf_asset_code} from {start_date}")
+            logger.info(f"Fetching {asset_code} -> {sys_asset_code} from {start_date}")
 
-            ticker = yf.Ticker(yf_asset_code)
+            ticker = yf.Ticker(sys_asset_code)
             currency = ticker.info.get("currency")
 
             data = ticker.history(
@@ -92,7 +95,7 @@ def load_asset_prices(ctx):
             )
 
             if data.empty:
-                logger.warning(f"No data for {asset_code} ({yf_asset_code})")
+                logger.warning(f"No data for {asset_code} ({sys_asset_code})")
                 continue
 
             for dt, row in data.iterrows():
@@ -112,10 +115,10 @@ def load_asset_prices(ctx):
 
                 all_data.append(record)
 
-            logger.info(f"Retrieved {len(data)} rows for {asset_code} ({yf_asset_code})")
+            logger.info(f"Retrieved {len(data)} rows for {asset_code} ({sys_asset_code})")
 
         except Exception as e:
-            logger.error(f"Failed {asset_code} -> {yf_asset_code}: {e}")
+            logger.error(f"Failed {asset_code} -> {sys_asset_code}: {e}")
 
     if not all_data:
         logger.warning("No new data retrieved for any asset.")
@@ -123,8 +126,14 @@ def load_asset_prices(ctx):
 
     df = pd.DataFrame(all_data)
 
-    # --- Remove duplicates ---
-    df = df[~df.apply(lambda r: (r["ASSET_CODE"], r["PRICE_DATE"]) in existing_set, axis=1)]
+    # Normalize columns to uppercase to avoid casing issues
+    df.columns = df.columns.str.upper()
+
+    # --- Remove duplicates efficiently using merge instead of apply ---
+    if existing_set:
+        existing_df = pd.DataFrame(list(existing_set), columns=["ASSET_CODE", "PRICE_DATE"])
+        df = df.merge(existing_df, on=["ASSET_CODE", "PRICE_DATE"], how="left", indicator=True)
+        df = df[df["_merge"] == "left_only"].drop(columns=["_merge"])
 
     if df.empty:
         logger.info("No new rows to insert after filtering existing prices.")
@@ -140,7 +149,8 @@ def load_asset_prices(ctx):
         logger.error("Failed to load data into Snowflake")
 
     cs.close()
-    
+
+
 if __name__ == "__main__":
     ctx = get_connection()
     load_asset_prices(ctx)

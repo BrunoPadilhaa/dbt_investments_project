@@ -1,4 +1,4 @@
-﻿transaction_type_code,affects_quantity,affects_cash,external_cash_flag
+﻿transaction_type,affects_quantity,affects_cash,external_cash_flag
 BUY,true,true,false
 SELL,true,true,false
 INCOME,false,true,false
@@ -6,3 +6,4 @@ TAX,false,true,false
 FEE,false,true,false
 CASH_TRANSFER,false,true,true
 CORPORATE_ACTION,true,false,false
+REALIZED_PNL,false,true,false

@@ -197,7 +197,7 @@ WITH calendar AS (
     ,   asse.asset_code     
     ,   trty.transaction_type
     ,   SUM(CASE
-            WHEN trty.transaction_type = 'Stock Sale' THEN tran.quantity * -1 
+            WHEN LOWER(trty.transaction_type) = 'sell' THEN tran.quantity * -1 
             ELSE tran.quantity
         END) AS quantity
     ,   SUM(tran.amount) * -1 AS amount  -- Negative = money out (purchase), positive = money in (sale)
@@ -206,7 +206,7 @@ WITH calendar AS (
         ON asse.asset_id = tran.asset_id
     LEFT JOIN {{ ref('dim_transaction_type') }} trty
         ON trty.transaction_type_id = tran.transaction_type_id
-    WHERE trty.transaction_type IN ('Stock Purchase','Stock Sale')
+    WHERE lower(trty.transaction_type) IN ('buy', 'sell')
 
     GROUP BY ALL
 )

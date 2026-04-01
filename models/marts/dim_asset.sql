@@ -8,33 +8,22 @@
 
 WITH CTE_ASSET AS (
     SELECT
-        {{dbt_utils.generate_surrogate_key(['ASSE.ASSET_CODE'])}} AS ASSET_ID,
-        ASSE.ASSET_CODE,
-        ASSE.ASSET_CODE_CURRENT,
-        ASSE.ASSET_NAME,
-        CASE 
-            WHEN ASDE.EXCHANGE = 'LSE' THEN 'England'
-            WHEN ASDE.EXCHANGE = 'GER' THEN 'Germany'
-            WHEN ASDE.EXCHANGE = 'AMS' THEN 'Netherlands' 
-            ELSE ASDE.ASSET_COUNTRY
-        END AS ASSET_COUNTRY,
-        CASE 
-            WHEN ASDE.ASSET_COUNTRY = 'Brazil' THEN 'Brazil'
-            ELSE 'Portugal'
-        END AS INVESTMENT_COUNTRY,
-        ASDE.YAHOO_FINANCE_ASSET_CODE,
-        ASDE.SHORTNAME,
-        ASDE.QUOTETYPE,
-        ASDE.SECTOR,
-        ASSE.ASSET_TYPE,
-        ASDE.INDUSTRY,
-        ASDE.EXCHANGE,
-        ASSE.SOURCE_SYSTEM,
-        ASSE.LOAD_TS
-    FROM {{ ref('stg_asset') }} ASSE
-    
-    LEFT JOIN {{ ref('stg_asset_details') }} ASDE
-        ON ASSE.ASSET_CODE = ASDE.ASSET_CODE
+        {{dbt_utils.generate_surrogate_key(['ASSET_CODE'])}} AS ASSET_ID,
+        ASSET_CODE,
+        ASSET_CODE_CURRENT,
+        ASSET_NAME,
+        ASSET_COUNTRY,
+        INVESTMENT_COUNTRY,
+        SHORTNAME,
+        QUOTETYPE,
+        SECTOR,
+        ASSET_TYPE,
+        INDUSTRY,
+        EXCHANGE,
+        SOURCE_SYSTEM,
+        LOAD_TS
+    FROM {{ ref('stg_asset') }}
 )
+
 
 SELECT * FROM CTE_ASSET

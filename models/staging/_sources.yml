@@ -34,7 +34,7 @@ sources:
         description: "Asset descriptive information such as field, area of business..."
 
       - name: raw_asset_seed
-        identifier: RAW_ASSET
+        identifier: RAW_ASSET_SEED
         description: "Asset descriptive information manually controlled through dbt seed"
 
       - name: raw_exchange_rates
@@ -44,4 +44,12 @@ sources:
           warn_after: {count: 1, period: day}
           error_after: {count: 2, period: day}
         loaded_at_field: LOAD_TS
+
+      - name: raw_transaction_type_seed
+        identifier: RAW_TRANSACTION_TYPE_SEED
+        description: "Transaction type information manually controlled through dbt seed"
+
+      - name: map_transaction_type_source_seed
+        identifier: MAP_TRANSACTION_TYPE_SOURCE_SEED
+        description: "Mapping between XTB and Clear transaction types"
 
