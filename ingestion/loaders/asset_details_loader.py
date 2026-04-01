@@ -20,7 +20,7 @@ def load_asset_info(asset_code: str, yf_asset_code: str) -> Dict:
 
     record = {
         "ASSET_CODE": asset_code,
-        "YF_ASSET_CODE": yf_asset_code,
+        "ASSET_CODE_SYSTEM": yf_asset_code,
         "SOURCE_SYSTEM": source_system,
         "LOAD_TS": now_ts
     }
@@ -68,9 +68,9 @@ def fetch_assets_from_seed():
         cs.execute(f"""
             SELECT DISTINCT
                 ASSET_CODE,
-                ASSET_CODE_YAHOO_FINANCE
+                ASSET_CODE_SYSTEM
             FROM RAW.{RAW_ASSET_SEED_TABLE}
-            WHERE ASSET_CODE_YAHOO_FINANCE IS NOT NULL
+            WHERE ASSET_CODE_SYSTEM IS NOT NULL
         """)
 
         rows = cs.fetchall()
@@ -78,9 +78,9 @@ def fetch_assets_from_seed():
 
         all_data = []
 
-        for asset_code, yf_asset_code in rows:
+        for asset_code, sys_asset_code in rows:
 
-            record = load_asset_info(asset_code, yf_asset_code)
+            record = load_asset_info(asset_code, sys_asset_code)
             all_data.append(record)
 
         if all_data:

@@ -1,7 +1,7 @@
-﻿source_transaction_type,transaction_type_code,source_system
+﻿source_transaction_type,transaction_type,source_system
 Stock Purchase,BUY,xtb_portugal
 Stock Sale,SELL,xtb_portugal
-Close Trade,SELL,xtb_portugal
+Close Trade,REALIZED_PNL,xtb_portugal
 Divident,INCOME,xtb_portugal
 Free-Funds Interest,INCOME,xtb_portugal
 Tax IFTT,TAX,xtb_portugal
@@ -24,6 +24,7 @@ Juros,INCOME,clear
 Juros Sobre Capital Próprio,INCOME,clear
 Juros Sobre Capital Próprio - Transferido,INCOME,clear
 Transferência,CASH_TRANSFER,clear
+Transferência - Liquidação,BUY,clear
 Bonificação em Ativos,CORPORATE_ACTION,clear
 Desdobro,CORPORATE_ACTION,clear
 Grupamento,CORPORATE_ACTION,clear

@@ -11,13 +11,10 @@ WITH transform_trades AS (
         tran.TRANSACTION_ID,
         CAST(REPLACE(CAST(tran.TRANSACTION_TIME AS DATE),'-','') AS INT) AS TRANSACTION_DATE_ID,
         trty.transaction_type_id,
-        asse.asset_id   ,
+        asse.asset_id,
+        'EUR' AS CURRENCY_ABRV,
         CASE
-            WHEN asse.INVESTMENT_COUNTRY = 'BRAZIL' THEN 'BRL'
-            ELSE 'EUR'
-        END AS CURRENCY_ABRV,
-        CASE
-            WHEN LOWER(tran.transaction_type) IN ('stock purchase', 'stock sale') THEN 
+            WHEN LOWER(tran.TRANSACTION_TYPE) IN ('buy', 'sell') THEN 
             CAST(
                 CASE
                     WHEN POSITION('/' IN tran.TRANSACTION_COMMENT) > 0
@@ -26,7 +23,7 @@ WITH transform_trades AS (
                 END AS DECIMAL(10,4)
             ) END AS QUANTITY,
         CASE
-            WHEN LOWER(tran.transaction_type) IN ('stock purchase', 'stock sale') THEN CAST(TRIM(SPLIT_PART(tran.TRANSACTION_COMMENT,'@',2)) AS DECIMAL(10,2)) END AS PRICE,
+            WHEN LOWER(tran.TRANSACTION_TYPE) IN ('buy', 'sell')THEN CAST(TRIM(SPLIT_PART(tran.TRANSACTION_COMMENT,'@',2)) AS DECIMAL(10,2)) END AS PRICE,
         tran.AMOUNT AS AMOUNT,
         tran.TRANSACTION_COMMENT AS COMMENT,
         tran.SOURCE_FILE AS SOURCE_FILE,

@@ -1,37 +1,42 @@
 WITH transactions_clear AS (
     SELECT
-        TRIM("Entrada/Saída") AS TRANSACTION_TYPE, 
+        TRIM(TRCL."Entrada/Saída") AS CASH_FLOW_DIRECTION, 
         COALESCE(
-                TRY_TO_TIMESTAMP("Data"),
-                TRY_TO_DATE("Data", 'DD/MM/YYYY')
+                TRY_TO_TIMESTAMP(TRCL."Data"),
+                TRY_TO_DATE(TRCL."Data", 'DD/MM/YYYY')
                 )
         AS TRANSACTION_DATE,
-        "Movimentação" AS TRANSACTION_TYPE_DETAIL, 
-        TRIM(SPLIT_PART("Produto",' - ',1)) AS ASSET_CODE, 
-        TRIM(SPLIT_PART("Produto",' - ',2)) AS ASSET_CODE_NAME, 
-        TRIM("Instituição") AS BROKER, 
-        CAST("Quantidade" AS DECIMAL(10,2)) AS QUANTITY, 
-        CAST(NULLIF("Preço unitário",'-') AS DECIMAL(10,2)) AS UNIT_PRICE, 
-        CAST(NULLIF("Valor da Operação",'-') AS DECIMAL(10,2)) AS VALUE,
-        SOURCE_FILE, 
-        SOURCE_SYSTEM, 
-        LOAD_TS
-    FROM {{ source('raw','raw_transactions_clear') }}
+        TRCL."Movimentação" AS TRANSACTION_TYPE_RAW, 
+        MTRTY.TRANSACTION_TYPE,
+        TRIM(SPLIT_PART(TRCL."Produto",' - ',1)) AS ASSET_CODE, 
+        TRIM(SPLIT_PART(TRCL."Produto",' - ',2)) AS ASSET_CODE_NAME, 
+        TRIM(TRCL."Instituição") AS BROKER, 
+        CAST(TRCL."Quantidade" AS DECIMAL(10,2)) AS QUANTITY, 
+        CAST(NULLIF(TRCL."Preço unitário",'-') AS DECIMAL(10,2)) AS UNIT_PRICE, 
+        CAST(NULLIF(TRCL."Valor da Operação",'-') AS DECIMAL(10,2)) AS VALUE,
+        TRCL.SOURCE_FILE, 
+        TRCL.SOURCE_SYSTEM, 
+        TRCL.LOAD_TS
+    FROM {{ source('raw','raw_transactions_clear') }} TRCL
+
+    LEFT JOIN {{ source('raw','map_transaction_type_source_seed') }} MTRTY
+    ON UPPER(TRCL."Movimentação") = UPPER(MTRTY.SOURCE_TRANSACTION_TYPE)
     )
 
 SELECT  MD5(
-            CONCAT(
-                    source_system, '|',
-                    transaction_date, '|',
-                    asset_code, '|',
-                    transaction_type_detail, '|',
-                    quantity, '|',
-                    value
+            CONCAT( 
+                    SOURCE_SYSTEM, '|',
+                    TRANSACTION_DATE, '|',
+                    CASH_FLOW_DIRECTION, '|',
+                    ASSET_CODE, '|',
+                    TRANSACTION_TYPE_RAW, '|',
+                    QUANTITY, '|',
+                    VALUE
                     )
                   ) AS TRANSACTION_ID,
-        TRANSACTION_TYPE,
+        TRANSACTION_TYPE_RAW,
         TRANSACTION_DATE,
-        TRANSACTION_TYPE_DETAIL,
+        TRANSACTION_TYPE,
         ASSET_CODE,
         ASSET_CODE_NAME,
         BROKER,
@@ -41,4 +46,4 @@ SELECT  MD5(
         SOURCE_FILE,
         SOURCE_SYSTEM,
         LOAD_TS
-     FROM transactions_clear
+     FROM TRANSACTIONS_CLEAR
