@@ -77,6 +77,7 @@ WITH calendar AS (
     ,   asse.asset_code
     FROM calendar cale
     CROSS JOIN {{ ref('dim_asset') }} asse
+    WHERE investment_country = 'Portugal'  -- Focus on Portugal stocks for now (XTB's main market)
 )
 
 -- Get distinct asset-currency combinations from asset prices
@@ -196,11 +197,8 @@ WITH calendar AS (
     ,   asse.asset_id
     ,   asse.asset_code     
     ,   trty.transaction_type
-    ,   SUM(CASE
-            WHEN LOWER(trty.transaction_type) = 'sell' THEN tran.quantity * -1 
-            ELSE tran.quantity
-        END) AS quantity
-    ,   SUM(tran.amount) * -1 AS amount  -- Negative = money out (purchase), positive = money in (sale)
+    ,   SUM(quantity) AS quantity
+    ,   SUM(tran.amount) AS amount  
     FROM {{ ref('fct_transactions') }} tran
     LEFT JOIN {{ ref('dim_asset') }} asse
         ON asse.asset_id = tran.asset_id
