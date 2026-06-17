@@ -35,7 +35,7 @@ Fração em Ativos,Debito,CORPORATE_ACTION,TRUE,clear
 Direito de Subscrição,Credito,CORPORATE_ACTION,FALSE,clear
 Direito Sobras de Subscrição,Credito,CORPORATE_ACTION,FALSE,clear
 Direito Sobras de Subscrição - Não Exercido,Debito,CORPORATE_ACTION,FALSE,clear
-Cessão de Direitos,Credito,CORPORATE_ACTION,TRUE,clear
+Cessão de Direitos,Credito,CORPORATE_ACTION,FALSE,clear
 Cessão de Direitos - Solicitada,Debito,CORPORATE_ACTION,TRUE,clear
 Direitos de Subscrição - Não Exercido,Debito,CORPORATE_ACTION,TRUE,clear
 Transferência,Credito,CUSTODY_TRANSFER,FALSE,clear
