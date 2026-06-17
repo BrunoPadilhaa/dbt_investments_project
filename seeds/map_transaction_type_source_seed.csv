@@ -1,39 +1,43 @@
-﻿source_transaction_type,transaction_type,source_system
-Stock Purchase,BUY,xtb_portugal
-Stock Sale,SELL,xtb_portugal
-Close Trade,REALIZED_PNL,xtb_portugal
-Divident,INCOME,xtb_portugal
-Free-Funds Interest,INCOME,xtb_portugal
-Tax IFTT,TAX,xtb_portugal
-Free-Funds Interest Tax,TAX,xtb_portugal
-Withholding Tax,TAX,xtb_portugal
-Sec Fee,FEE,xtb_portugal
-Deposit,CASH_TRANSFER,xtb_portugal
-Correction,CORPORATE_ACTION,xtb_portugal
-Compra,BUY,clear
-Solicitação de Subscrição,BUY,clear
-Direitos de Subscrição - Exercido,BUY,clear
-Direitos de Subscrição - Excercído,BUY,clear
-Recibo de Subscrição,BUY,clear
-Venda,SELL,clear
-Leilão de Fração,SELL,clear
-Resgate,SELL,clear
-Dividendo,INCOME,clear
-Rendimento,INCOME,clear
-Juros,INCOME,clear
-Juros Sobre Capital Próprio,INCOME,clear
-Juros Sobre Capital Próprio - Transferido,INCOME,clear
-Transferência,CASH_TRANSFER,clear
-Transferência - Liquidação,BUY,clear
-Bonificação em Ativos,CORPORATE_ACTION,clear
-Desdobro,CORPORATE_ACTION,clear
-Grupamento,CORPORATE_ACTION,clear
-Incorporação,CORPORATE_ACTION,clear
-Atualização,CORPORATE_ACTION,clear
-Fração em Ativos,CORPORATE_ACTION,clear
-Direito de Subscrição,CORPORATE_ACTION,clear
-Direito Sobras de Subscrição,CORPORATE_ACTION,clear
-Direito Sobras de Subscrição - Não Exercido,CORPORATE_ACTION,clear
-Cessão de Direitos,CORPORATE_ACTION,clear
-Cessão de Direitos - Solicitada,CORPORATE_ACTION,clear
-Direitos de Subscrição - Não Exercido,CORPORATE_ACTION,clear
+﻿source_transaction_type,source_side,transaction_type,is_debit,source_system
+Stock Purchase,,BUY,FALSE,xtb_portugal
+Stock Sale,,SELL,TRUE,xtb_portugal
+Close Trade,,REALIZED_PNL,FALSE,xtb_portugal
+Divident,,INCOME,FALSE,xtb_portugal
+Free-Funds Interest,,INCOME,FALSE,xtb_portugal
+Tax IFTT,,TAX,FALSE,xtb_portugal
+Free-Funds Interest Tax,,TAX,FALSE,xtb_portugal
+Withholding Tax,,TAX,FALSE,xtb_portugal
+Sec Fee,,FEE,FALSE,xtb_portugal
+Deposit,,CASH_TRANSFER,FALSE,xtb_portugal
+Correction,,CORPORATE_ACTION,FALSE,xtb_portugal
+Compra,Credito,BUY,FALSE,clear
+Solicitação de Subscrição,Debito,BUY,FALSE,clear
+Direitos de Subscrição - Exercido,Debito,CORPORATE_ACTION,TRUE,clear
+Recibo de Subscrição,Credito,BUY,FALSE,clear
+Venda,Debito,SELL,TRUE,clear
+Leilão de Fração,Credito,INCOME,FALSE,clear
+Resgate,Credito,SELL,TRUE,clear
+Dividendo,Credito,INCOME,FALSE,clear
+Rendimento,Credito,INCOME,FALSE,clear
+Juros,Credito,INCOME,FALSE,clear
+Juros Sobre Capital Próprio,Credito,INCOME,FALSE,clear
+Juros Sobre Capital Próprio - Transferido,Debito,INCOME,FALSE,clear
+Transferência - Liquidação,Debito,SELL,TRUE,clear
+Transferência - Liquidação,Credito,BUY,FALSE,clear
+Bonificação em Ativos,Credito,CORPORATE_ACTION,FALSE,clear
+Desdobro,Credito,CORPORATE_ACTION,FALSE,clear
+Grupamento,Credito,POSITION_RESTATEMENT,FALSE,clear
+Incorporação,Credito,CORPORATE_ACTION,FALSE,clear
+Incorporação,Debito,CORPORATE_ACTION,TRUE,clear
+Atualização,Credito,POSITION_RESTATEMENT,FALSE,clear
+Atualização,Debito,POSITION_RESTATEMENT,TRUE,clear
+Fração em Ativos,Debito,CORPORATE_ACTION,TRUE,clear
+Direito de Subscrição,Credito,CORPORATE_ACTION,FALSE,clear
+Direito Sobras de Subscrição,Credito,CORPORATE_ACTION,FALSE,clear
+Direito Sobras de Subscrição - Não Exercido,Debito,CORPORATE_ACTION,FALSE,clear
+Cessão de Direitos,Credito,CORPORATE_ACTION,FALSE,clear
+Cessão de Direitos - Solicitada,Debito,CORPORATE_ACTION,TRUE,clear
+Direitos de Subscrição - Não Exercido,Debito,CORPORATE_ACTION,TRUE,clear
+Transferência,Credito,CUSTODY_TRANSFER,FALSE,clear
+Transferência,Debito,CUSTODY_TRANSFER,FALSE,clear
+Grupamento,Debito,CORPORATE_ACTION,TRUE,clear

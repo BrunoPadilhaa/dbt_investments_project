@@ -53,3 +53,7 @@ sources:
         identifier: MAP_TRANSACTION_TYPE_SOURCE_SEED
         description: "Mapping between XTB and Clear transaction types"
 
+      - name: corporate_action_adjustments_seed
+        identifier: CORPORATE_ACTION_ADJUSTMENTS_SEED
+        description: "Manual corporate action adjustments to compensate for missing debit rows in source data"
+
