@@ -17,7 +17,7 @@ models:
         description: "Date of the transaction"
 
 
-  - name: stg_stock_prices
+  - name: stg_asset_prices
     description: "Cleaned daily stock prices"
     columns:
       - name: ticker
