@@ -27,6 +27,7 @@ Transferência - Liquidação,Credito,BUY,FALSE,clear
 Bonificação em Ativos,Credito,CORPORATE_ACTION,FALSE,clear
 Desdobro,Credito,CORPORATE_ACTION,FALSE,clear
 Grupamento,Credito,POSITION_RESTATEMENT,FALSE,clear
+Grupamento,Debito,CORPORATE_ACTION,TRUE,clear
 Incorporação,Credito,CORPORATE_ACTION,FALSE,clear
 Incorporação,Debito,CORPORATE_ACTION,TRUE,clear
 Atualização,Credito,POSITION_RESTATEMENT,FALSE,clear
@@ -40,4 +41,3 @@ Cessão de Direitos - Solicitada,Debito,CORPORATE_ACTION,TRUE,clear
 Direitos de Subscrição - Não Exercido,Debito,CORPORATE_ACTION,TRUE,clear
 Transferência,Credito,CUSTODY_TRANSFER,FALSE,clear
 Transferência,Debito,CUSTODY_TRANSFER,FALSE,clear
-Grupamento,Debito,CORPORATE_ACTION,TRUE,clear
