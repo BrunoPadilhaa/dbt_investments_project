@@ -13,14 +13,6 @@ sources:
           error_after: {count: 45, period: day}
         loaded_at_field: LOAD_TS
 
-      - name: raw_transactions_clear
-        identifier: RAW_TRANSACTIONS_CLEAR
-        description: "Raw transactions from Clear"
-        freshness:
-          warn_after: {count: 35, period: day}
-          error_after: {count: 45, period: day}
-        loaded_at_field: LOAD_TS    
-
       - name: raw_asset_prices
         identifier: RAW_ASSET_PRICES
         description: "Daily asset prices from Yahoo Finance"
@@ -39,7 +31,7 @@ sources:
 
       - name: raw_exchange_rates
         identifier: RAW_EXCHANGE_RATES
-        description: "Daily exchange rates for USD, BRL and GBP to EUR"
+        description: "Daily exchange rates for USD and GBP to EUR"
         freshness:
           warn_after: {count: 1, period: day}
           error_after: {count: 2, period: day}
@@ -51,9 +43,5 @@ sources:
 
       - name: map_transaction_type_source_seed
         identifier: MAP_TRANSACTION_TYPE_SOURCE_SEED
-        description: "Mapping between XTB and Clear transaction types"
-
-      - name: corporate_action_adjustments_seed
-        identifier: CORPORATE_ACTION_ADJUSTMENTS_SEED
-        description: "Manual corporate action adjustments to compensate for missing debit rows in source data"
+        description: "Mapping between source transaction types and standardized transaction types"
 

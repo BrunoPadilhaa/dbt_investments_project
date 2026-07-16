@@ -50,7 +50,6 @@ def load_exchange_rates():
     # --- Currency pairs ---
     currency_pairs = [
         ("USD", "EUR", "USDEUR=X"),
-        ("BRL", "EUR", "BRLEUR=X"),
         ("GBP", "EUR", "GBPEUR=X")
     ]
 

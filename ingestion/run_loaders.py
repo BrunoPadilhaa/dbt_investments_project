@@ -9,7 +9,6 @@ import subprocess
 from ingestion.snowflake_connection import get_connection
 from ingestion.loaders.exchange_rates_loader import load_exchange_rates
 from ingestion.loaders.asset_prices_loader import load_asset_prices
-from ingestion.loaders.transactions_clear_loader import load_clear_transactions
 from ingestion.loaders.transactions_xtb_loader import load_xtb_transactions
 from ingestion.loaders.asset_details_loader import fetch_assets_from_seed
 
@@ -24,7 +23,6 @@ logger = logging.getLogger(__name__)
 LOADERS = [
     ("Exchange Rates",   load_exchange_rates),
     ("Asset Prices",     load_asset_prices),
-    ("Transactions XP",  load_clear_transactions),
     ("Transactions XTB", load_xtb_transactions),
     ("Asset Details",    fetch_assets_from_seed),
 ]

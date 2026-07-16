@@ -27,7 +27,6 @@ currency_final AS (
             WHEN 'USD' THEN 'US Dollar'
             WHEN 'EUR' THEN 'Euro'
             WHEN 'GBP' THEN 'British Pound'
-            WHEN 'BRL' THEN 'Brazilian Real'
             ELSE CURRENCY_ABRV || ' Currency'
         END AS CURRENCY_NAME,
         MAX(LOAD_TS) AS LOAD_TS,

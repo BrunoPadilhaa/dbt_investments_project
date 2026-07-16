@@ -23,44 +23,6 @@
 
 -- Get all calendar dates up to yesterday (ensures complete price/rate data availability)
 
-/*
-    DATA QUALITY & KEY MANAGEMENT CONSIDERATIONS
-    
-    CURRENT STATE:
-    - transaction_id is currently unique in fct_transactions (XTB broker only)
-    - transaction_id serves as the primary key for XTB transactions
-    
-    FUTURE CHALLENGE - MULTI-BROKER SUPPORT:
-    When integrating additional brokers (e.g., Clear Broker), we face a key collision risk:
-    - XTB transaction_ids and Clear Broker transaction_ids may overlap
-    - transaction_id alone cannot serve as a unique identifier across multiple sources
-    
-    PROPOSED SOLUTION:
-    Implement a composite key or generate a surrogate key:
-    Option 1: Composite Key (broker_id + transaction_id)
-    Option 2: Hash Key (MD5/SHA of broker_id + transaction_id + transaction_date)
-    Option 3: Surrogate Key (auto-incrementing warehouse-generated ID)
-    
-    REAL-WORLD EXAMPLE - BROKER TRANSACTION SPLITTING:
-    Asset: IDVY
-    Date: 2024-09-30
-    Scenario: Single trade split into 3 separate transactions by broker
-    
-    What we see in source system:
-    - 3 rows with identical date, price, and amount
-    - 3 different transaction_ids (broker-assigned)
-    - This is CORRECT behavior - broker executes large orders in batches
-    
-    Why this matters:
-    - Each split transaction has a unique ID in the broker's system
-    - We must preserve all 3 records to maintain audit trail
-    - Deduplication based on date/price/amount would be INCORRECT
-    
-    ACTION REQUIRED:
-    Before adding new broker sources, implement a universal transaction key strategy
-    to prevent ID conflicts and maintain data integrity across all sources.
-*/
-
 WITH calendar AS (
     SELECT
         date_id
@@ -172,7 +134,7 @@ WITH calendar AS (
 )
 
 -- Enrich asset prices with asset and currency metadata
--- Price remains in native currency at this stage (USD, BRL, EUR, etc.)
+-- Price remains in native currency at this stage (USD, EUR, etc.)
 , asset_prices AS (
     SELECT 
         stpr.price_date_id
