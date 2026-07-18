@@ -4,7 +4,7 @@ AAPL,AAPL,AAPL,Apple Inc.,STOCK
 ARCC,ARCC,ARCC,Ares Capital Corporation,STOCK
 COST,COST,COST,Costco Wholesale Corporation,STOCK
 ENEL,ENEL,ENEL.IT,Enel S.p.A.,STOCK
-EUNA,EUNA,EUNA.DE,Encavis AG,ETF
+EUNA,EUNA,EUNA.DE,iShares Core Global Aggregate Bond UCITS ETF EUR Hedged,ETF
 IDVY,IDVY,IDVY.AS,iShares EURO Dividend UCITS ETF,ETF
 JNJ,JNJ,JNJ,Johnson & Johnson,STOCK
 KO,KO,KO,The Coca-Cola Company,STOCK
@@ -17,9 +17,12 @@ O,O,O,Realty Income Corporation,REIT
 OXY,OXY,OXY,Occidental Petroleum Corporation,STOCK
 PFE,PFE,PFE,Pfizer Inc.,STOCK
 PLTR,PLTR,PLTR,Palantir Technologies Inc.,STOCK
-SXRV,SXRV,SXRV.DE,iShares STOXX Europe 600 Basic Resources UCITS ETF,ETF
+SXRV,SXRV,SXRV.DE,iShares NASDAQ 100 UCITS ETF,ETF
 TTD,TTD,TTD,The Trade Desk,STOCK
 TTE,TTE,TTE.PA,TotalEnergies SE,STOCK
 VHYD,VHYD,VHYD.L,Vanguard FTSE All-World High Dividend Yield UCITS ETF,ETF
 WDP,WDP,WDP.BR,Warehouses De Pauw NV,STOCK
 VWCE,VWCE,VWCE.DE,Vanguard FTSE All-World,ETF
+LYP6,LYP6,LYP6.DE,Amundi Core Stoxx Europe 600 UCITS ETF,ETF
+IS3N,IS3N,IS3N.DE,iShares Core MSCI EM IMI UCITS ETF,ETF
+EGAN,EGAN,EGAN,eGain Corporation,STOCK

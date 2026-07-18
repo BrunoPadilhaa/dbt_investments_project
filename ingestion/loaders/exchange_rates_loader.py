@@ -35,16 +35,14 @@ def load_exchange_rates():
     cs.execute(f"SELECT MAX(RATE_DATE) FROM RAW.{RAW_EXCHANGE_TABLE}")
     max_date_result = cs.fetchone()[0]
 
-    # if max_date_result is None:
-    #     start_date = datetime(2024, 1, 1).date()
-    #     logger.info("Table is empty. Fetching from 2024-01-01")
-    # else:
-    #     start_date = max_date_result  # re-fetch last date too, in case it was partial
-    #     logger.info(f"Last loaded date: {max_date_result}. Fetching from: {start_date}")
+    if max_date_result is None:
+        start_date = datetime(2024, 1, 1).date()
+        logger.info("Table is empty. Fetching from 2024-01-01")
+    else:
+        start_date = max_date_result  # re-fetch last date too, in case it was partial
+        logger.info(f"Last loaded date: {max_date_result}. Fetching from: {start_date}")
 
-    # end_date = datetime.now().date()
-    start_date = datetime(2018, 1, 1).date()
-    end_date = datetime(2024, 1, 2).date()
+    end_date = datetime.now().date()
     logger.info(f"Date range: {start_date} to {end_date}")
 
     # --- Currency pairs ---

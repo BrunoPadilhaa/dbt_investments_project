@@ -6,7 +6,14 @@
     )
 }}
 
-WITH cte_asset AS 
+
+WITH assets AS (
+    SELECT
+        DISTINCT SPLIT_PART(SYMBOL,'.',1) AS ASSET_CODE
+    FROM {{ source('raw','raw_transactions_xtb') }}
+    WHERE SYMBOL IS NOT NULL
+)
+, cte_asset_seed AS 
 (
     SELECT
         UPPER(TRIM(ASSET_CODE))         AS ASSET_CODE
@@ -19,13 +26,13 @@ WITH cte_asset AS
     FROM {{ source('raw', 'raw_asset_seed') }}
 )
 
-,   cte_asset_details AS 
+,   cte_asset_details  AS 
 (
     SELECT
         UPPER(TRIM(ASSET_CODE))                         AS ASSET_CODE
     ,   UPPER(TRIM(ASSET_CODE_SYSTEM))                  AS ASSET_CODE_SYSTEM
     ,   TRIM(COUNTRY)                                   AS ASSET_COUNTRY
-    ,   REGEXP_REPLACE(TRIM(SHORTNAME), '\\s+', ' ')   AS SHORTNAME
+    ,   REGEXP_REPLACE(TRIM(SHORTNAME), '\\s+', ' ')    AS SHORTNAME
     ,   TRIM(QUOTETYPE)                                 AS QUOTETYPE
     ,   TRIM(SECTOR)                                    AS SECTOR
     ,   TRIM(INDUSTRY)                                  AS INDUSTRY
@@ -38,8 +45,8 @@ WITH cte_asset AS
 
 SELECT
     ASSE.ASSET_CODE
-,   ASSE.ASSET_CODE_CURRENT
-,   ASSE.ASSET_NAME
+,   ASSD.ASSET_CODE_CURRENT
+,   ASSD.ASSET_NAME
 ,   CASE 
         WHEN ASSET_DTL.EXCHANGE = 'LSE' THEN 'England'
         WHEN ASSET_DTL.EXCHANGE = 'GER' THEN 'Germany'
@@ -50,14 +57,18 @@ SELECT
 ,   ASSET_DTL.SHORTNAME
 ,   ASSET_DTL.QUOTETYPE
 ,   ASSET_DTL.SECTOR
-,   ASSE.ASSET_TYPE
+,   ASSD.ASSET_TYPE
 ,   ASSET_DTL.INDUSTRY
 ,   ASSET_DTL.EXCHANGE
-,   ASSE.SOURCE_SYSTEM
-,   ASSE.LOAD_TS
+,   ASSD.SOURCE_SYSTEM
+,   ASSD.LOAD_TS
 
-FROM cte_asset ASSE
+FROM assets asse
+
+LEFT
+JOIN cte_asset_seed assd
+ON asse.ASSET_CODE = assd.ASSET_CODE
 
 LEFT JOIN cte_asset_details ASSET_DTL
     ON  ASSE.ASSET_CODE        = ASSET_DTL.ASSET_CODE
-    AND ASSE.ASSET_CODE_SYSTEM = ASSET_DTL.ASSET_CODE_SYSTEM
+    AND ASSD.ASSET_CODE_SYSTEM = ASSET_DTL.ASSET_CODE_SYSTEM
