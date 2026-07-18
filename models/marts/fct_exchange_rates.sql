@@ -1,7 +1,5 @@
 {{ config(
-    materialized = 'incremental',
-    unique_key = ['RATE_DATE_ID', 'CURRENCY_ID_FROM', 'CURRENCY_ID_TO'],
-    incremental_strategy = 'merge'
+    materialized = 'table'
 ) }}
 
 WITH dates_spine AS (
@@ -70,9 +68,3 @@ filled AS (
 SELECT *
 FROM filled
 WHERE EXCHANGE_RATE IS NOT NULL  -- exclude dates before first ever rate was loaded
-
-{% if is_incremental() %}
-    AND RATE_DATE_ID > (
-        SELECT COALESCE(MAX(RATE_DATE_ID), 0) FROM {{ this }}
-    )
-{% endif %}

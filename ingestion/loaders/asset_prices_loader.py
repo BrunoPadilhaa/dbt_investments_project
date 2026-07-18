@@ -66,11 +66,8 @@ def load_asset_prices(ctx):
 
     all_data = []
 
-    #default_start = date(2024, 1, 1)
-    #end_date = datetime.now().date()
-
-    default_start = datetime(2017, 1, 1).date()
-    end_date = datetime(2019, 1, 2).date()
+    default_start = date(2019, 1, 1)
+    end_date = datetime.now().date()
 
     for asset_code in asset_codes:
 
@@ -83,7 +80,7 @@ def load_asset_prices(ctx):
             if isinstance(max_date, datetime):
                 max_date = max_date.date()
 
-            start_date = default_start #max_date + timedelta(days=1)
+            start_date = max_date + timedelta(days=1)
 
             logger.info(f"Fetching {asset_code} -> {sys_asset_code} from {start_date}")
 
@@ -91,7 +88,7 @@ def load_asset_prices(ctx):
             currency = ticker.info.get("currency")
 
             data = ticker.history(
-                start=default_start,
+                start=start_date,
                 end=end_date,
                 interval="1d",
                 auto_adjust=False
@@ -102,6 +99,10 @@ def load_asset_prices(ctx):
                 continue
 
             for dt, row in data.iterrows():
+
+                if pd.isna(row["Close"]):
+                    logger.warning(f"Skipping {asset_code} on {dt.date()}: no close price yet (unsettled/partial trading day)")
+                    continue
 
                 record = {
                     "ASSET_CODE": asset_code,
