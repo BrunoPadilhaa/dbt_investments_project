@@ -41,23 +41,23 @@ models:
       tests:
       - not_null
       - relationships:
-        to: ref('dim_asset')
-        field: asset_id
+          to: ref('dim_asset')
+          field: asset_id
     - name: transaction_type_id
       description: "Contains unique ids for each transaction type"
       tests:
       - not_null
       - relationships:
-        to: ref('dim_transaction_type')
-        field: transaction_type_id
+          to: ref('dim_transaction_type')
+          field: transaction_type_id
 
 - name: fct_portfolio_snapshots_daily
   description: "Information about trades"
   tests:
     - dbt_utils.unique_combination_of_columns:
-      combination_of_columns:
-      - date_id
-      - asset_id
+        combination_of_columns:
+        - date_id
+        - asset_id
 
 - name: dim_date
   description: "date dimension"
@@ -72,26 +72,23 @@ models:
   description: "Daily asset prices"
   tests:
     - dbt_utils.unique_combination_of_columns:
-      combination_of_columns:
-      - price_date_id
-      - asset_id
-  columns: 
+        combination_of_columns:
+        - price_date_id
+        - asset_id
+  columns:
     - name: asset_id
       description: "Contains unique ids for each asset"
       tests:
       - not_null
-      relationships:
-        to: ref('dim_asset')
-        field: asset_id
+      - relationships:
+          to: ref('dim_asset')
+          field: asset_id
 
 - name: fct_exchange_rates
   description: "Daily exchange rates"
   tests:
   - dbt_utils.unique_combination_of_columns:
-    combination_of_columns:
-    - rate_date_id
-    - currency_id_from
-    - currency_id_to
-      
-      
-
+      combination_of_columns:
+      - rate_date_id
+      - currency_id_from
+      - currency_id_to

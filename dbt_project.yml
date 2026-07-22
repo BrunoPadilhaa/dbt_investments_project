@@ -9,6 +9,9 @@ models:
     staging:
       +schema: STAGING
       +materialized: table
+    intermediate:
+      +schema: INTERMEDIATE
+      +materialized: table
     marts:
       +schema: PROD
       +materialized: table
