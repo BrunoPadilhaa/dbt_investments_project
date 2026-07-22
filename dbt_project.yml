@@ -6,9 +6,6 @@ profile: 'INVESTMENTS'
 
 models:
   INVESTMENTS:
-    raw:
-      +schema: RAW
-      +materialized: table
     staging:
       +schema: STAGING
       +materialized: table

@@ -8,7 +8,7 @@ WITH all_currencies AS (
 
     SELECT UPPER(TRIM(CURRENCY)) AS CURRENCY_ABRV, MAX(LOAD_TS) AS LOAD_TS
     FROM {{ ref('stg_transactions_xtb') }}
-    WHERE CURRENCY IS NOT NULL
+    WHERE CURRENCY_TO IS NOT NULL
     GROUP BY 1
 
     UNION
