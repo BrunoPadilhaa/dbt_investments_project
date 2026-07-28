@@ -1,14 +1,12 @@
 {{ config(
-    materialized='incremental',
-    incremental_strategy='merge',
-    unique_key='CURRENCY_ABRV',
+    materialized='table',
 ) }}
 
 WITH all_currencies AS (
 
     SELECT UPPER(TRIM(CURRENCY)) AS CURRENCY_ABRV, MAX(LOAD_TS) AS LOAD_TS
     FROM {{ ref('stg_transactions_xtb') }}
-    WHERE CURRENCY_TO IS NOT NULL
+    WHERE CURRENCY IS NOT NULL
     GROUP BY 1
 
     UNION
@@ -30,7 +28,7 @@ currency_final AS (
             ELSE CURRENCY_ABRV || ' Currency'
         END AS CURRENCY_NAME,
         MAX(LOAD_TS) AS LOAD_TS,
-        CURRENT_TIMESTAMP() AS DBT_UPDATED_AT
+        {{ dbt_updated_at() }} AS DBT_UPDATED_AT
     FROM all_currencies
     GROUP BY CURRENCY_ABRV
 )

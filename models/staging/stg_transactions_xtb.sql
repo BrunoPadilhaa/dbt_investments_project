@@ -28,7 +28,7 @@ WITH cte_raw_trades AS
     WHERE ID != 'Total'
 
     {% if is_incremental() %}
-    AND LOAD_TS > (SELECT COALESCE(MAX(LOAD_TS), '1900-01-01'::TIMESTAMP_NTZ) FROM {{ this }})
+    AND {{ incremental_load_filter('LOAD_TS') }}
     {% endif %}
 )
 

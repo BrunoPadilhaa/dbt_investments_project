@@ -1,28 +1,28 @@
-ASSET_CODE,ASSET_CODE_CURRENT,ASSET_CODE_SYSTEM,ASSET_NAME,ASSET_TYPE
-4GLD,4GLD,4GLD.DE,Xetra-Gold,COMMODITIES
-AAPL,AAPL,AAPL,Apple Inc.,STOCK
-ARCC,ARCC,ARCC,Ares Capital Corporation,STOCK
-COST,COST,COST,Costco Wholesale Corporation,STOCK
-ENEL,ENEL,ENEL.IT,Enel S.p.A.,STOCK
-EUNA,EUNA,EUNA.DE,iShares Core Global Aggregate Bond UCITS ETF EUR Hedged,ETF
-IDVY,IDVY,IDVY.AS,iShares EURO Dividend UCITS ETF,ETF
-JNJ,JNJ,JNJ,Johnson & Johnson,STOCK
-KO,KO,KO,The Coca-Cola Company,STOCK
-LDOS,LDOS,LDOS,Leidos Holdings,STOCK
-MAIN,MAIN,MAIN,Main Street Capital Corporation,STOCK
-MNST,MNST,MNST,Monster Beverage Corporation,STOCK
-MSFT,MSFT,MSFT,Microsoft Corporation,STOCK
-NVDA,NVDA,NVDA,NVIDIA Corporation,STOCK
-O,O,O,Realty Income Corporation,REIT
-OXY,OXY,OXY,Occidental Petroleum Corporation,STOCK
-PFE,PFE,PFE,Pfizer Inc.,STOCK
-PLTR,PLTR,PLTR,Palantir Technologies Inc.,STOCK
-SXRV,SXRV,SXRV.DE,iShares NASDAQ 100 UCITS ETF,ETF
-TTD,TTD,TTD,The Trade Desk,STOCK
-TTE,TTE,TTE.PA,TotalEnergies SE,STOCK
-VHYD,VHYD,VHYD.L,Vanguard FTSE All-World High Dividend Yield UCITS ETF,ETF
-WDP,WDP,WDP.BR,Warehouses De Pauw NV,STOCK
-VWCE,VWCE,VWCE.DE,Vanguard FTSE All-World,ETF
-LYP6,LYP6,LYP6.DE,Amundi Core Stoxx Europe 600 UCITS ETF,ETF
-IS3N,IS3N,IS3N.DE,iShares Core MSCI EM IMI UCITS ETF,ETF
-EGAN,EGAN,EGAN,eGain Corporation,STOCK
+ASSET_CODE,ASSET_CODE_SYSTEM,ASSET_NAME,ASSET_TYPE
+4GLD,4GLD.DE,Xetra-Gold,COMMODITIES
+AAPL,AAPL,Apple Inc.,STOCK
+ARCC,ARCC,Ares Capital Corporation,STOCK
+COST,COST,Costco Wholesale Corporation,STOCK
+ENEL,ENEL.IT,Enel S.p.A.,STOCK
+EUNA,EUNA.DE,iShares Core Global Aggregate Bond UCITS ETF EUR Hedged,ETF
+IDVY,IDVY.AS,iShares EURO Dividend UCITS ETF,ETF
+JNJ,JNJ,Johnson & Johnson,STOCK
+KO,KO,The Coca-Cola Company,STOCK
+LDOS,LDOS,Leidos Holdings,STOCK
+MAIN,MAIN,Main Street Capital Corporation,STOCK
+MNST,MNST,Monster Beverage Corporation,STOCK
+MSFT,MSFT,Microsoft Corporation,STOCK
+NVDA,NVDA,NVIDIA Corporation,STOCK
+O,O,Realty Income Corporation,REIT
+OXY,OXY,Occidental Petroleum Corporation,STOCK
+PFE,PFE,Pfizer Inc.,STOCK
+PLTR,PLTR,Palantir Technologies Inc.,STOCK
+SXRV,SXRV.DE,iShares NASDAQ 100 UCITS ETF,ETF
+TTD,TTD,The Trade Desk,STOCK
+TTE,TTE.PA,TotalEnergies SE,STOCK
+VHYD,VHYD.L,Vanguard FTSE All-World High Dividend Yield UCITS ETF,ETF
+WDP,WDP.BR,Warehouses De Pauw NV,STOCK
+VWCE,VWCE.DE,Vanguard FTSE All-World,ETF
+LYP6,LYP6.DE,Amundi Core Stoxx Europe 600 UCITS ETF,ETF
+IS3N,IS3N.DE,iShares Core MSCI EM IMI UCITS ETF,ETF
+EGAN,EGAN,eGain Corporation,STOCK

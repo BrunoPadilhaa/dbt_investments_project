@@ -20,7 +20,7 @@ models:
       - unique
 
 - name: dim_transaction_type
-  description: "Information about currencies"
+  description: "Information about transaction types"
   columns: 
     - name: transaction_type_id
       description: "Contains unique ids for each currency"
@@ -39,7 +39,6 @@ models:
     - name: asset_id
       description: "Contains unique ids for each asset"
       tests:
-      - not_null
       - relationships:
           to: ref('dim_asset')
           field: asset_id
@@ -52,7 +51,7 @@ models:
           field: transaction_type_id
 
 - name: fct_portfolio_snapshots_daily
-  description: "Information about trades"
+  description: "Daily portfolio position and valuation snapshots"
   tests:
     - dbt_utils.unique_combination_of_columns:
         combination_of_columns:

@@ -10,7 +10,6 @@ WITH CTE_ASSET AS (
     SELECT
         {{dbt_utils.generate_surrogate_key(['ASSET_CODE'])}} AS ASSET_ID,
         ASSET_CODE,
-        ASSET_CODE_CURRENT,
         ASSET_NAME,
         ASSET_COUNTRY,
         INVESTMENT_COUNTRY,

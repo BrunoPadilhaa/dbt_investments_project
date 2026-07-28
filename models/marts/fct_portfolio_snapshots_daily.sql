@@ -42,15 +42,6 @@ WITH calendar AS (
     WHERE investment_country = 'Portugal'  -- Focus on Portugal stocks for now (XTB's main market)
 )
 
--- Get distinct asset-currency combinations from asset prices
--- Needed to know which currency each asset's prices are denominated in
-, asset_price_currency_asset AS (
-    SELECT DISTINCT 
-        asset_id
-    ,   price_currency_id
-    FROM {{ ref('fct_asset_prices') }}
-)
-
 -- Exchange rates are already forward-filled for every date/currency pair by
 -- int_exchange_rates_filled; only the EUR-to-EUR identity rate is added here.
 , exchange_rates AS (
@@ -62,51 +53,22 @@ WITH calendar AS (
             WHEN curr.currency_abrv = 'EUR' THEN 1
             ELSE exra.exchange_rate
         END AS exchange_rate_filled
-    FROM {{ ref('int_exchange_rates_filled') }} exra
+    FROM {{ ref('fct_exchange_rates') }} exra
     LEFT JOIN {{ ref('dim_currency') }} curr
         ON curr.currency_id = exra.currency_id_from
 )
 
--- Create spine: every asset for every date with its price currency
-, asset_prices_spine AS (
-    SELECT
-        cale.date_id
-    ,   spct.asset_id
-    ,   spct.price_currency_id
-    FROM calendar cale
-    CROSS JOIN asset_price_currency_asset spct
-)
-
--- Forward-fill asset prices to cover weekends and holidays
--- Uses most recent closing price when markets are closed
-, asset_prices_filled AS (
-    SELECT 
-        spsp.date_id AS price_date_id
-    ,   spsp.asset_id
-    ,   spsp.price_currency_id
-    ,   stpr.price_adj_close
-    ,   LAST_VALUE(stpr.price_adj_close IGNORE NULLS) OVER (
-            PARTITION BY spsp.asset_id 
-            ORDER BY spsp.date_id 
-            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-        ) AS price_adj_close_filled
-    FROM asset_prices_spine spsp
-    LEFT JOIN {{ ref('fct_asset_prices') }} stpr
-        ON stpr.price_date_id = spsp.date_id
-        AND stpr.asset_id = spsp.asset_id
-)
-
--- Enrich asset prices with asset and currency metadata
--- Price remains in native currency at this stage (USD, EUR, etc.)
+-- Enrich forward-filled asset prices (int_asset_prices_filled) with asset and
+-- currency metadata. Price remains in native currency at this stage (USD, EUR, etc.)
 , asset_prices AS (
-    SELECT 
+    SELECT
         stpr.price_date_id
     ,   asse.asset_id
     ,   stpr.price_currency_id
     ,   curr.currency_abrv
     ,   asse.asset_code
-    ,   stpr.price_adj_close_filled
-    FROM asset_prices_filled stpr
+    ,   stpr.price_adj_close AS price_adj_close_filled
+    FROM {{ ref('int_asset_prices_filled') }} stpr
     LEFT JOIN {{ ref('dim_asset') }} asse
         ON asse.asset_id = stpr.asset_id
     LEFT JOIN {{ ref('dim_currency') }} curr

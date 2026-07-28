@@ -15,7 +15,7 @@ t_exchange_rates AS (
         EXRA.EXCHANGE_RATE,
         EXRA.SOURCE_SYSTEM,
         EXRA.LOAD_TS,
-        CURRENT_TIMESTAMP()::TIMESTAMP_NTZ                AS DBT_UPDATED_AT
+        {{ dbt_updated_at() }}                            AS DBT_UPDATED_AT
     FROM {{ ref('stg_exchange_rates') }} EXRA
     LEFT JOIN {{ ref('dim_currency') }} CUFR
         ON CUFR.CURRENCY_ABRV = UPPER(TRIM(EXRA.CURRENCY_FROM))
@@ -42,22 +42,13 @@ filled AS (
         S.RATE_DATE_ID,
         S.CURRENCY_ID_FROM,
         S.CURRENCY_ID_TO,
-        LAST_VALUE(R.EXCHANGE_RATE IGNORE NULLS) OVER (
-            PARTITION BY S.CURRENCY_ID_FROM, S.CURRENCY_ID_TO
-            ORDER BY S.RATE_DATE_ID
-            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-        )                                                 AS EXCHANGE_RATE,
-        LAST_VALUE(R.SOURCE_SYSTEM IGNORE NULLS) OVER (
-            PARTITION BY S.CURRENCY_ID_FROM, S.CURRENCY_ID_TO
-            ORDER BY S.RATE_DATE_ID
-            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-        )                                                 AS SOURCE_SYSTEM,
-        LAST_VALUE(R.LOAD_TS IGNORE NULLS) OVER (
-            PARTITION BY S.CURRENCY_ID_FROM, S.CURRENCY_ID_TO
-            ORDER BY S.RATE_DATE_ID
-            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-        )                                                 AS LOAD_TS,
-        CURRENT_TIMESTAMP()::TIMESTAMP_NTZ                AS DBT_UPDATED_AT
+        {{ forward_fill('R.EXCHANGE_RATE', 'S.CURRENCY_ID_FROM, S.CURRENCY_ID_TO', 'S.RATE_DATE_ID') }}
+                                                            AS EXCHANGE_RATE,
+        {{ forward_fill('R.SOURCE_SYSTEM', 'S.CURRENCY_ID_FROM, S.CURRENCY_ID_TO', 'S.RATE_DATE_ID') }}
+                                                            AS SOURCE_SYSTEM,
+        {{ forward_fill('R.LOAD_TS', 'S.CURRENCY_ID_FROM, S.CURRENCY_ID_TO', 'S.RATE_DATE_ID') }}
+                                                            AS LOAD_TS,
+        {{ dbt_updated_at() }}                            AS DBT_UPDATED_AT
     FROM spine_x_pairs S
     LEFT JOIN t_exchange_rates R
         ON R.RATE_DATE_ID     = S.RATE_DATE_ID
