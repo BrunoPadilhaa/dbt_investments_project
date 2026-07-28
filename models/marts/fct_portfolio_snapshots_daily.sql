@@ -42,108 +42,33 @@ WITH calendar AS (
     WHERE investment_country = 'Portugal'  -- Focus on Portugal stocks for now (XTB's main market)
 )
 
--- Get distinct asset-currency combinations from asset prices
--- Needed to know which currency each asset's prices are denominated in
-, asset_price_currency_asset AS (
-    SELECT DISTINCT 
-        asset_id
-    ,   price_currency_id
-    FROM {{ ref('fct_asset_prices') }}
-)
-
--- Get all distinct currency pairs that exist in our exchange rate data
-, currency_pairs AS (
-    SELECT DISTINCT
-        currency_id_from, 
-        currency_id_to
-    FROM {{ ref('fct_exchange_rates') }}
-)
-
--- Create spine: every currency pair for every date
--- Allows forward-filling of exchange rates across non-trading days
-, exchange_rates_spine AS (
-    SELECT
-        cale.date_id
-    ,   cupa.currency_id_from
-    ,   cupa.currency_id_to
-    FROM calendar cale
-    CROSS JOIN currency_pairs cupa
-)
-
--- Forward-fill exchange rates to cover weekends and holidays
--- Uses LAST_VALUE with IGNORE NULLS to carry forward the most recent known rate
--- Special handling: EUR to EUR is always 1.0
+-- Exchange rates are already forward-filled for every date/currency pair by
+-- int_exchange_rates_filled; only the EUR-to-EUR identity rate is added here.
 , exchange_rates AS (
     SELECT
-        ersp.date_id AS rate_date_id
-    ,   ersp.currency_id_from
-    ,   ersp.currency_id_to
-    ,   exra.exchange_rate
-    ,   LAST_VALUE(exra.exchange_rate IGNORE NULLS) OVER (
-            PARTITION BY ersp.currency_id_from, ersp.currency_id_to
-            ORDER BY ersp.date_id 
-            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-        ) AS exchange_rate_filled
-    FROM exchange_rates_spine ersp
-    LEFT JOIN (
-        -- Set EUR to EUR conversion as 1.0, use actual rates for other currencies
-        SELECT 
-            exra.rate_date_id
-        ,   exra.currency_id_from
-        ,   exra.currency_id_to
-        ,   CASE 
-                WHEN curr.currency_abrv = 'EUR' THEN 1 
-                ELSE exra.exchange_rate
-            END AS exchange_rate
-        FROM {{ ref('fct_exchange_rates') }} exra
-        LEFT JOIN {{ ref('dim_currency') }} curr
-            ON curr.currency_id = exra.currency_id_from
-    ) exra
-        ON exra.rate_date_id = ersp.date_id
-        AND exra.currency_id_from = ersp.currency_id_from
-        AND exra.currency_id_to = ersp.currency_id_to
+        exra.rate_date_id
+    ,   exra.currency_id_from
+    ,   exra.currency_id_to
+    ,   CASE
+            WHEN curr.currency_abrv = 'EUR' THEN 1
+            ELSE exra.exchange_rate
+        END AS exchange_rate_filled
+    FROM {{ ref('fct_exchange_rates') }} exra
+    LEFT JOIN {{ ref('dim_currency') }} curr
+        ON curr.currency_id = exra.currency_id_from
 )
 
--- Create spine: every asset for every date with its price currency
-, asset_prices_spine AS (
-    SELECT
-        cale.date_id
-    ,   spct.asset_id
-    ,   spct.price_currency_id
-    FROM calendar cale
-    CROSS JOIN asset_price_currency_asset spct
-)
-
--- Forward-fill asset prices to cover weekends and holidays
--- Uses most recent closing price when markets are closed
-, asset_prices_filled AS (
-    SELECT 
-        spsp.date_id AS price_date_id
-    ,   spsp.asset_id
-    ,   spsp.price_currency_id
-    ,   stpr.price_adj_close
-    ,   LAST_VALUE(stpr.price_adj_close IGNORE NULLS) OVER (
-            PARTITION BY spsp.asset_id 
-            ORDER BY spsp.date_id 
-            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-        ) AS price_adj_close_filled
-    FROM asset_prices_spine spsp
-    LEFT JOIN {{ ref('fct_asset_prices') }} stpr
-        ON stpr.price_date_id = spsp.date_id
-        AND stpr.asset_id = spsp.asset_id
-)
-
--- Enrich asset prices with asset and currency metadata
--- Price remains in native currency at this stage (USD, EUR, etc.)
+-- Enrich forward-filled asset prices (int_asset_prices_filled) with asset and
+-- currency metadata. Price remains in native currency at this stage (USD, EUR, etc.)
 , asset_prices AS (
-    SELECT 
+    SELECT
         stpr.price_date_id
     ,   asse.asset_id
     ,   stpr.price_currency_id
     ,   curr.currency_abrv
     ,   asse.asset_code
-    ,   stpr.price_adj_close_filled
-    FROM asset_prices_filled stpr
+    ,   stpr.price_adj_close AS price_adj_close_filled
+    FROM {{ ref('int_asset_prices_filled') }} stpr
     LEFT JOIN {{ ref('dim_asset') }} asse
         ON asse.asset_id = stpr.asset_id
     LEFT JOIN {{ ref('dim_currency') }} curr

@@ -20,7 +20,7 @@ WITH t_asset_prices AS (
     ,   CURR.CURRENCY_ID AS PRICE_CURRENCY_ID
     ,   ASPR.SOURCE_SYSTEM
     ,   ASPR.LOAD_TS
-    ,   CURRENT_TIMESTAMP()::TIMESTAMP_NTZ AS DBT_UPDATED_AT
+    ,   {{ dbt_updated_at() }} AS DBT_UPDATED_AT
     FROM {{ref('stg_asset_prices')}} ASPR
 
     LEFT
@@ -32,7 +32,7 @@ WITH t_asset_prices AS (
 
     {% if is_incremental() %}
 
-        WHERE ASPR.LOAD_TS > (SELECT COALESCE(MAX(LOAD_TS), '1900-01-01'::TIMESTAMP_NTZ) FROM {{ this }})
+        WHERE {{ incremental_load_filter('ASPR.LOAD_TS') }}
 
     {% endif %}
 )

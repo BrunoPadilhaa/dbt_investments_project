@@ -1,0 +1,41 @@
+version: 2
+
+models:
+- name: int_exchange_rates_filled
+  description: "Daily exchange rates forward-filled across every date and currency pair (weekends/holidays carry the most recent known rate)"
+  columns:
+    - name: rate_date_id
+      description: "Date of the rate, YYYYMMDD"
+      tests:
+      - not_null
+    - name: currency_id_from
+      description: "Surrogate key of the source currency"
+      tests:
+      - not_null
+    - name: currency_id_to
+      description: "Surrogate key of the target currency"
+      tests:
+      - not_null
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      combination_of_columns:
+        - rate_date_id
+        - currency_id_from
+        - currency_id_to
+
+- name: int_asset_prices_filled
+  description: "Daily asset closing prices forward-filled across every date (weekends/holidays carry the most recent known price)"
+  columns:
+    - name: price_date_id
+      description: "Date of the price, YYYYMMDD"
+      tests:
+      - not_null
+    - name: asset_id
+      description: "Surrogate key of the asset"
+      tests:
+      - not_null
+  tests:
+  - dbt_utils.unique_combination_of_columns:
+      combination_of_columns:
+        - price_date_id
+        - asset_id

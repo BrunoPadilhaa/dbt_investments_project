@@ -9,10 +9,7 @@
 WITH STG_XTB AS (
     SELECT * FROM {{ ref('stg_transactions_xtb') }}
     {% if is_incremental() %}
-        WHERE LOAD_TS > (
-            SELECT COALESCE(MAX(LOAD_TS), '1900-01-01'::TIMESTAMP_NTZ)
-            FROM {{ this }}
-        )
+        WHERE {{ incremental_load_filter('LOAD_TS') }}
     {% endif %}
 ),
 
@@ -43,7 +40,7 @@ TRANSFORM_XTB AS (
         TRAN.SOURCE_FILE,
         TRAN.SOURCE_SYSTEM,
         TRAN.LOAD_TS,
-        CURRENT_TIMESTAMP()::TIMESTAMP_NTZ                                    AS DBT_UPDATED_AT
+        {{ dbt_updated_at() }}                                                AS DBT_UPDATED_AT
     FROM STG_XTB TRAN
     LEFT JOIN {{ ref('dim_asset') }} ASSE
         ON ASSE.ASSET_CODE = TRAN.ASSET_CODE
