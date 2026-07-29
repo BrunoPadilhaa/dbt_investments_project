@@ -1,12 +1,12 @@
-source_transaction_type,source_side,transaction_type,is_debit,source_system
-Stock Purchase,,BUY,FALSE,xtb_portugal
-Stock Sale,,SELL,TRUE,xtb_portugal
-Close Trade,,REALIZED_PNL,FALSE,xtb_portugal
-Divident,,INCOME,FALSE,xtb_portugal
-Free-Funds Interest,,INCOME,FALSE,xtb_portugal
-Tax IFTT,,TAX,FALSE,xtb_portugal
-Free-Funds Interest Tax,,TAX,FALSE,xtb_portugal
-Withholding Tax,,TAX,FALSE,xtb_portugal
-Sec Fee,,FEE,FALSE,xtb_portugal
-Deposit,,CASH_TRANSFER,FALSE,xtb_portugal
-Correction,,CORPORATE_ACTION,FALSE,xtb_portugal
+source_transaction_type,transaction_type,source_system
+Stock Purchase,BUY,xtb_portugal
+Stock Sale,SELL,xtb_portugal
+Close Trade,REALIZED_PNL,xtb_portugal
+Divident,INCOME,xtb_portugal
+Free-Funds Interest,INCOME,xtb_portugal
+Tax IFTT,TAX,xtb_portugal
+Free-Funds Interest Tax,TAX,xtb_portugal
+Withholding Tax,TAX,xtb_portugal
+Sec Fee,FEE,xtb_portugal
+Deposit,CASH_TRANSFER,xtb_portugal
+Correction,CORPORATE_ACTION,xtb_portugal

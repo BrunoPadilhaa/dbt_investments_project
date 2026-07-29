@@ -68,7 +68,7 @@ models:
       - unique
 
 - name: fct_asset_prices
-  description: "Daily asset prices"
+  description: "Daily asset closing prices, forward-filled across every date (weekends/holidays carry the most recent known price)"
   tests:
     - dbt_utils.unique_combination_of_columns:
         combination_of_columns:
@@ -82,6 +82,13 @@ models:
       - relationships:
           to: ref('dim_asset')
           field: asset_id
+    - name: price_date_id
+      description: "Contains unique ids for each date"
+      tests:
+      - not_null
+      - relationships:
+          to: ref('dim_date')
+          field: date_id
 
 - name: fct_exchange_rates
   description: "Daily exchange rates"
@@ -91,3 +98,11 @@ models:
       - rate_date_id
       - currency_id_from
       - currency_id_to
+  columns:
+    - name: rate_date_id
+      description: "Contains unique ids for each date"
+      tests:
+      - not_null
+      - relationships:
+          to: ref('dim_date')
+          field: date_id

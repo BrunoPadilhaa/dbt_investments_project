@@ -62,7 +62,13 @@ UNIONED  AS (
             ELSE QUANTITY
         END AS QUANTITY,
         PRICE,
-        AMOUNT * -1 AS AMOUNT,
+        -- BUY/SELL are flipped from raw so amount mirrors quantity's build/unwind
+        -- polarity (BUY=+/+, SELL=-/-); every other type keeps its raw sign, which
+        -- already matches the desired ledger sign (income +, tax/fee -, deposits +).
+        CASE
+            WHEN TRANSACTION_TYPE IN ('BUY', 'SELL') THEN AMOUNT * -1
+            ELSE AMOUNT
+        END AS AMOUNT,
         COMMENT,
         SOURCE_FILE,
         SOURCE_SYSTEM,

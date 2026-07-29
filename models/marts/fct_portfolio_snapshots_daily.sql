@@ -39,11 +39,10 @@ WITH calendar AS (
     ,   asse.asset_code
     FROM calendar cale
     CROSS JOIN {{ ref('dim_asset') }} asse
-    WHERE investment_country = 'Portugal'  -- Focus on Portugal stocks for now (XTB's main market)
 )
 
 -- Exchange rates are already forward-filled for every date/currency pair by
--- int_exchange_rates_filled; only the EUR-to-EUR identity rate is added here.
+-- fct_exchange_rates; only the EUR-to-EUR identity rate is added here.
 , exchange_rates AS (
     SELECT
         exra.rate_date_id
@@ -58,7 +57,7 @@ WITH calendar AS (
         ON curr.currency_id = exra.currency_id_from
 )
 
--- Enrich forward-filled asset prices (int_asset_prices_filled) with asset and
+-- Enrich forward-filled asset prices (fct_asset_prices) with asset and
 -- currency metadata. Price remains in native currency at this stage (USD, EUR, etc.)
 , asset_prices AS (
     SELECT
@@ -68,7 +67,7 @@ WITH calendar AS (
     ,   curr.currency_abrv
     ,   asse.asset_code
     ,   stpr.price_adj_close AS price_adj_close_filled
-    FROM {{ ref('int_asset_prices_filled') }} stpr
+    FROM {{ ref('fct_asset_prices') }} stpr
     LEFT JOIN {{ ref('dim_asset') }} asse
         ON asse.asset_id = stpr.asset_id
     LEFT JOIN {{ ref('dim_currency') }} curr
