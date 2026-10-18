@@ -10,6 +10,9 @@ from ingestion.snowflake_connection import get_connection
 from ingestion.loaders.exchange_rates_loader import load_exchange_rates
 from ingestion.loaders.asset_prices_loader import load_asset_prices
 from ingestion.loaders.transactions_xtb_loader import load_xtb_transactions
+from ingestion.loaders.positions_b3_loader import load_b3_positions
+from ingestion.loaders.trades_b3_loader import load_b3_trades
+from ingestion.loaders.transactions_b3_loader import load_b3_transactions
 from ingestion.loaders.asset_details_loader import fetch_assets_from_seed
 
 
@@ -24,6 +27,9 @@ LOADERS = [
     ("Exchange Rates",   load_exchange_rates),
     ("Asset Prices",     load_asset_prices),
     ("Transactions XTB", load_xtb_transactions),
+    ("Positions B3",     load_b3_positions),
+    ("Trades B3",        load_b3_trades),
+    ("Transactions B3",  load_b3_transactions),
     ("Asset Details",    fetch_assets_from_seed),
 ]
 
