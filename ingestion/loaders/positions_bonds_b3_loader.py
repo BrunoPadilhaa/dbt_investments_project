@@ -11,16 +11,16 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 # --- Table ---
-RAW_TABLE = "RAW_POSITIONS_B3"
+RAW_TABLE = "RAW_POSITIONS_BONDS_B3"
 
 # --- Folder containing Excel files ---
 DATA_PATH = r"C:\Users\bruno\Documents\dbt_projects\dataset\Brazil\month_reports"
 
 # --- Position sheets to append ---
-SHEETS = ["Posição - Ações", "Posição - Fundos"]
+SHEETS = ["Posição - Tesouro Direto"]
 
 
-def load_b3_positions(ctx):
+def load_b3_bond_positions(ctx):
     """Load B3 Brazil monthly consolidated report position sheets into Snowflake."""
 
     cs = ctx.cursor()
@@ -61,13 +61,15 @@ def load_b3_positions(ctx):
                         # --- Rename columns to match Snowflake table schema ---
                         df = df.rename(columns={
                             'Produto': 'PRODUCT',
-                            'Código de Negociação': 'ASSET_CODE',
+                            'Vencimento': 'MATURITY_DATE',
                             'Quantidade Disponível': 'AVAILABLE_QUANTITY',
+                            'Valor Aplicado': 'INVESTED_VALUE_IN_BRL',
                             'Valor Atualizado': 'MARKET_VALUE_IN_BRL'
                         })
 
                         # --- Keep only relevant columns ---
-                        df = df[['PRODUCT', 'ASSET_CODE', 'AVAILABLE_QUANTITY', 'MARKET_VALUE_IN_BRL',
+                        df = df[['PRODUCT', 'MATURITY_DATE', 'AVAILABLE_QUANTITY',
+                                 'INVESTED_VALUE_IN_BRL', 'MARKET_VALUE_IN_BRL',
                                  'SOURCE_FILE', 'SOURCE_SYSTEM', 'LOAD_TS']]
 
                         all_dfs.append(df)
@@ -103,5 +105,5 @@ def load_b3_positions(ctx):
 
 if __name__ == "__main__":
     ctx = get_connection()
-    load_b3_positions(ctx)
+    load_b3_bond_positions(ctx)
     ctx.close()

@@ -45,12 +45,22 @@ sources:
         identifier: MAP_TRANSACTION_TYPE_SOURCE_SEED
         description: "Mapping between source transaction types and standardized transaction types"
 
-      - name: raw_positions_b3
-        identifier: RAW_POSITIONS_B3
-        description: "Raw position data from B3"
+      - name: raw_positions_equities_b3
+        identifier: RAW_POSITIONS_EQUITIES_B3
+        description: "Raw equity position data from B3"
+        loaded_at_field: LOAD_TS
+
+      - name: raw_positions_bonds_b3
+        identifier: RAW_POSITIONS_BONDS_B3
+        description: "Raw bond position data from B3"
         loaded_at_field: LOAD_TS
 
       - name: raw_trades_b3
         identifier: RAW_TRADES_B3
         description: "Raw trade data from B3"
+        loaded_at_field: LOAD_TS
+
+      - name: raw_transactions_b3
+        identifier: RAW_TRANSACTIONS_B3
+        description: "Raw transaction data from B3"
         loaded_at_field: LOAD_TS
