@@ -1,5 +1,8 @@
 Welcome to your new dbt project!
 
+### Notes
+- The Python ingestion scripts (`ingestion/`) were vibecoded (built with AI coding assistance).
+
 ### Using the starter project
 
 Try running the following commands:
