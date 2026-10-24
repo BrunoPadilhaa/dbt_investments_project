@@ -1,8 +1,21 @@
+WITH raw_equities AS (
 SELECT
     IFF(ENDSWITH(ASSET_CODE,'F'), LEFT(ASSET_CODE, LENGTH(ASSET_CODE)-1), ASSET_CODE) AS ASSET_CODE,
-    TO_DECIMAL(AVAILABLE_QUANTITY,10,2) AS QUANTITY,
+    TO_DECIMAL(AVAILABLE_QUANTITY,10,2) AS SHARES_HELD,
     TO_DECIMAL(MARKET_VALUE_IN_BRL, 10,2) AS MARKET_VALUE_IN_BRL,
     SOURCE_FILE,
-    SOURCE_SYSTEM,
-    LOAD_TS
+    SOURCE_SYSTEM
 FROM {{source('raw', 'raw_positions_equities_b3')}}
+)
+
+SELECT
+    COALESCE(conv.CURRENT_ASSET_CODE, rawe.ASSET_CODE) AS ASSET_CODE,
+    SHARES_HELD,
+    MARKET_VALUE_IN_BRL,
+    SOURCE_FILE,
+    SOURCE_SYSTEM,
+    {{dbt.current_timestamp()}} AS LOAD_TS    
+FROM raw_equities rawe    
+    
+LEFT JOIN {{ref('raw_asset_conversion_mapping')}} conv
+ON rawe.ASSET_CODE = conv.RAW_ASSET_CODE

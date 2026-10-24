@@ -1,0 +1,1 @@
+SELECT * FROM {{ source('raw', 'raw_asset_conversion_mapping') }}

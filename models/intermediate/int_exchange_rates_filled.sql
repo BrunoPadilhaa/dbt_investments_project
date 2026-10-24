@@ -1,4 +1,5 @@
 {{ config(
+    enabled=false,
     materialized = 'table'
 ) }}
 

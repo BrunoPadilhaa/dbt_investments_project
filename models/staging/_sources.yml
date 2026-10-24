@@ -25,7 +25,7 @@ sources:
         identifier: RAW_ASSET_DETAILS
         description: "Asset descriptive information such as field, area of business..."
 
-      - name: raw_asset_seed
+      - name: raw_asset_mapping
         identifier: RAW_ASSET_SEED
         description: "Asset descriptive information manually controlled through dbt seed"
 
@@ -64,3 +64,12 @@ sources:
         identifier: RAW_TRANSACTIONS_B3
         description: "Raw transaction data from B3"
         loaded_at_field: LOAD_TS
+
+      - name: raw_asset_conversion_mapping
+        identifier: RAW_ASSET_CONVERSION_MAPPING
+        description: "Mapping between source asset identifiers and standardized asset identifiers"
+
+      # - name: raw_corporate_action_adjustments
+      #   identifier: RAW_CORPORATE_ACTION_ADJUSTMENTS
+      #   description: "Raw corporate action adjustments data"
+      #   loaded_at_field: LOAD_TS

@@ -1,5 +1,6 @@
 {{ config(
     materialized='table',
+    enabled=false,
 ) }}
 
 WITH all_currencies AS (

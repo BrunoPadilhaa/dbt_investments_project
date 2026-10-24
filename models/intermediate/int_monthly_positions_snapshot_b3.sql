@@ -2,39 +2,39 @@
 --Created by Bruno Padilha on 2024-06-19
 --This model is responsible for creating the intermediate table that consolidates the positions of equities and bonds from B3, 
 --along with the amount invested in each asset. The amount invested is calculated based on the transactions made in each asset, 
---which are aggregated by month. Markets values are also included in the final output and it is cumulative. 
+--which are aggregated by month. Markets values are also included in the final output and it is cumulative.
+--position that were closed is automatically removed from the source system. 
 
 WITH transactions_b3 AS (
     SELECT
          DATE_TRUNC(month,trade_date) AS transaction_date
     ,    ASSET_CODE
-    ,    SUM(QUANTITY) AS QUANTITY
-    ,    SUM(AMOUNT) AS AMOUNT
-    FROM {{ref('stg_trades_b3')}} 
-    GROUP BY ALL
+    ,    SHARES_HELD
+    ,    COST_BASIS_IN_BRL
+    FROM {{ref('stg_trades_b3')}}
+
+    QUALIFY ROW_NUMBER() OVER (partition by ASSET_CODE, DATE_TRUNC('month', TRADE_DATE) order by trade_date desc) = 1
 )
 
 , positions_b3 AS (
-SELECT
-    asset_code
-,   quantity
-,   0 AS INVESTED_VALUE_IN_BRL --this is updated in the cte populated_invested_brl_equities
-,   market_value_in_brl
-,   source_file
-,   source_system
-,   load_ts --replace with dbt function
-FROM {{ref('stg_positions_equities_b3')}}
+    SELECT
+        asset_code
+    ,   shares_held
+    ,   0 AS cost_basis_in_brl --this is updated in the cte populated_invested_brl_equities
+    ,   market_value_in_brl
+    ,   source_file
+    ,   source_system
+    FROM {{ref('stg_positions_equities_b3')}}
 
 UNION ALL
 
 SELECT
     PRODUCT,
-    QUANTITY,
-    INVESTED_VALUE_IN_BRL,
+    SHARES_HELD,
+    0 AS COST_BASIS_IN_BRL, 
     MARKET_VALUE_IN_BRL,
     SOURCE_FILE,
     SOURCE_SYSTEM,
-    LOAD_TS
 FROM {{ref('stg_positions_bonds_b3')}}
 )
 
@@ -72,9 +72,9 @@ FROM positions_b3 posi
     SELECT
         posi.position_date
     ,   posi.ASSET_CODE
-    ,   posi.QUANTITY AS QUANTITY_CUMULATIVE
-    ,   COALESCE(tran.AMOUNT, posi.INVESTED_VALUE_IN_BRL) AS AMOUNT_INVESTED_IN_BRL
-    ,   posi.MARKET_VALUE_IN_BRL AS MARKET_VALUE_IN_BRL_CUMULATIVE
+    ,   posi.SHARES_HELD
+    ,   {{forward_fill('tran.COST_BASIS_IN_BRL', 'posi.ASSET_CODE', 'posi.position_date')}} AS COST_BASIS_IN_BRL
+    ,   posi.MARKET_VALUE_IN_BRL
     ,   {{ dbt.current_timestamp() }} AS LOAD_TS
     FROM include_position_date posi
     
@@ -84,7 +84,4 @@ FROM positions_b3 posi
     AND tran.asset_code = posi.asset_code
     )
 
-SELECT * FROM populate_amount_invested
-
-
-       
+SELECT * FROM populate_amount_invested      

@@ -36,8 +36,8 @@ def load_exchange_rates():
     max_date_result = cs.fetchone()[0]
 
     if max_date_result is None:
-        start_date = datetime(2024, 1, 1).date()
-        logger.info("Table is empty. Fetching from 2024-01-01")
+        start_date = datetime(2019, 1, 1).date()
+        logger.info("Table is empty. Fetching from 2019-01-01")
     else:
         start_date = max_date_result  # re-fetch last date too, in case it was partial
         logger.info(f"Last loaded date: {max_date_result}. Fetching from: {start_date}")
@@ -48,7 +48,8 @@ def load_exchange_rates():
     # --- Currency pairs ---
     currency_pairs = [
         ("USD", "EUR", "USDEUR=X"),
-        ("GBP", "EUR", "GBPEUR=X")
+        ("GBP", "EUR", "GBPEUR=X"),
+        ("EUR", "BRL", "EURBRL=X")
     ]
 
     all_data = []

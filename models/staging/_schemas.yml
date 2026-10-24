@@ -55,6 +55,52 @@ models:
       - name: asset_code
         description: "Asset code"
         tests:
+         - unique
+         - not_null
+
+  - name: stg_asset_mapping
+    description: "Cleaned asset mapping data"
+    columns:
+      - name: asset_code
+        description: "Asset code"
+        tests:
+          - unique 
           - not_null
 
-  
+  - name: stg_asset_details
+    description: "Cleaned asset details data"
+    columns:
+      - name: asset_code
+        description: "Asset code"
+        tests:
+          - unique 
+          - not_null
+
+  - name: stg_trades_b3
+    description: "Cleaned B3 trades data"
+    columns:
+      - name: trade_key
+        description: "Unique identifier for each trade"
+        tests:
+          - unique
+          - not_null
+      - name: trade_date
+        description: "Date of the trade"
+        tests:
+          - not_null
+      - name: asset_code
+        description: "Asset code"
+        tests:
+          - not_null
+      - name: shares_held
+        description: "Number of shares held after the trade"
+        tests:
+          - not_null
+      - name: cost_basis_in_brl
+        description: "Cost basis in BRL after the trade"
+        tests:
+          - not_null
+      - name: avg_cost_price
+        description: "Average cost price per share in BRL after the trade"
+        tests:
+          - not_null

@@ -8,8 +8,9 @@
 
 WITH CTE_ASSET AS (
     SELECT
-        {{dbt_utils.generate_surrogate_key(['ASSET_CODE'])}} AS ASSET_ID,
-        ASSET_CODE,
+        {{dbt_utils.generate_surrogate_key(['ORIGINAL_ASSET_CODE'])}} AS ASSET_ID,
+        CURRENT_ASSET_CODE,
+        ORIGINAL_ASSET_CODE,
         ASSET_NAME,
         ASSET_COUNTRY,
         INVESTMENT_COUNTRY,
@@ -21,7 +22,7 @@ WITH CTE_ASSET AS (
         EXCHANGE,
         SOURCE_SYSTEM,
         LOAD_TS
-    FROM {{ ref('stg_asset') }}
+    FROM {{ ref('int_assets') }}
 )
 
 

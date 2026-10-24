@@ -1,5 +1,6 @@
 {{
     config(
+        enabled=false,
         materialized='incremental',
         unique_key='TRANSACTION_ID',
         incremental_strategy='merge'

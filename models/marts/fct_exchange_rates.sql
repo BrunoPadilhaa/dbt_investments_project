@@ -1,5 +1,1 @@
-{{ config(
-    materialized = 'table'
-) }}
-
-SELECT * FROM {{ ref('int_exchange_rates_filled') }}
+SELECT * FROM {{ ref('stg_exchange_rates') }}
