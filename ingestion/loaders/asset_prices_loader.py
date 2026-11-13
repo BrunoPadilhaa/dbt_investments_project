@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 RAW_ASSET_PRICES_TABLE = "RAW_ASSET_PRICES"
-RAW_ASSET_SEED_TABLE = "RAW_ASSET_SEED"
+RAW_ASSET_SEED_TABLE = "RAW_ASSET_MAPPING"
 
 
 def load_asset_prices(ctx):

@@ -1,12 +1,45 @@
-source_transaction_type,transaction_type,source_system
-Stock Purchase,BUY,xtb_portugal
-Stock Sale,SELL,xtb_portugal
-Close Trade,REALIZED_PNL,xtb_portugal
-Divident,INCOME,xtb_portugal
-Free-Funds Interest,INCOME,xtb_portugal
-Tax IFTT,TAX,xtb_portugal
-Free-Funds Interest Tax,TAX,xtb_portugal
-Withholding Tax,TAX,xtb_portugal
-Sec Fee,FEE,xtb_portugal
-Deposit,CASH_TRANSFER,xtb_portugal
-Correction,CORPORATE_ACTION,xtb_portugal
+source_transaction_type,source_transaction_direction,transaction_type,source_system
+Stock Purchase,,BUY,xtb_portugal
+Stock Sale,,SELL,xtb_portugal
+Close Trade,,REALIZED_PNL,xtb_portugal
+Divident,,INCOME,xtb_portugal
+Free-Funds Interest,,INCOME,xtb_portugal
+Tax IFTT,,TAX,xtb_portugal
+Free-Funds Interest Tax,,TAX,xtb_portugal
+Withholding Tax,,TAX,xtb_portugal
+Sec Fee,,FEE,xtb_portugal
+Deposit,,CASH_TRANSFER,xtb_portugal
+Correction,,CORPORATE_ACTION,xtb_portugal
+Compra,,BUY,b3
+Venda,,SELL,b3
+Transferência - Liquidação,Credito,BUY,b3
+Transferência - Liquidação,Debito,SELL,b3
+Resgate,,REALIZED_PNL,b3
+Leilão de Fração,,REALIZED_PNL,b3
+Dividendo,,INCOME,b3
+Juros Sobre Capital Próprio,,INCOME,b3
+Juros Sobre Capital Próprio - Transferido,,INCOME,b3
+Rendimento,,INCOME,b3
+Juros,,INCOME,b3
+Transferência,,CUSTODY_TRANSFER,b3
+Desdobro,,CORPORATE_ACTION,b3
+Grupamento,,POSITION_RESTATEMENT,b3
+Bonificação em Ativos,,CORPORATE_ACTION,b3
+Fração em Ativos,,CORPORATE_ACTION,b3
+Incorporação,,POSITION_RESTATEMENT,b3
+Atualização,,POSITION_RESTATEMENT,b3
+Direito de Subscrição,,POSITION_RESTATEMENT,b3
+Direitos de Subscrição - Exercido,,POSITION_RESTATEMENT,b3
+Direitos de Subscrição - Excercído,,POSITION_RESTATEMENT,b3
+Direitos de Subscrição - Não Exercido,,POSITION_RESTATEMENT,b3
+Direito Sobras de Subscrição,,POSITION_RESTATEMENT,b3
+Direito Sobras de Subscrição - Não Exercido,,POSITION_RESTATEMENT,b3
+Cessão de Direitos,,POSITION_RESTATEMENT,b3
+Cessão de Direitos - Solicitada,,POSITION_RESTATEMENT,b3
+Solicitação de Subscrição,,POSITION_RESTATEMENT,b3
+Recibo de Subscrição,,POSITION_RESTATEMENT,b3
+REVERSE_SPLIT,,CORPORATE_ACTION,b3_adjustments
+SUBSCRIPTION,,CORPORATE_ACTION,b3_adjustments
+MERGER,,CORPORATE_ACTION,b3_adjustments
+RIGHTS_EXIT,,CORPORATE_ACTION,b3_adjustments
+OPENING_BALANCE,,CORPORATE_ACTION,b3_adjustments
