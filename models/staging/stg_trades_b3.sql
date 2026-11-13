@@ -144,7 +144,9 @@ raw_trades_b3 AS (
         ROW_NUM,
         TRADE_DATE,
         CAST(SHARES_TRADED AS NUMBER(18,2)) AS SHARES_HELD,
-        CAST(NET_AMOUNT_TRADED_BRL AS NUMBER(18,6)) AS COST_BASIS_IN_BRL
+        CAST(NET_AMOUNT_TRADED_BRL AS NUMBER(18,6)) AS COST_BASIS_IN_BRL,
+        SOURCE_FILE,
+        SOURCE_SYSTEM
     FROM classify_trades
     WHERE ROW_NUM = 1
 
@@ -163,7 +165,9 @@ raw_trades_b3 AS (
                 WHEN 'Baixa'  THEN p.COST_BASIS_IN_BRL + t.SHARES_TRADED * DIV0(p.COST_BASIS_IN_BRL, p.SHARES_HELD)
                 WHEN 'Ajuste' THEN p.COST_BASIS_IN_BRL + t.NET_AMOUNT_TRADED_BRL
             END
-        AS NUMBER(18,6)) AS COST_BASIS_IN_BRL
+        AS NUMBER(18,6)) AS COST_BASIS_IN_BRL,
+        t.SOURCE_FILE,
+        t.SOURCE_SYSTEM
     FROM running_cost_basis p
     INNER JOIN classify_trades t
         ON  t.ASSET_CODE = p.ASSET_CODE
@@ -176,5 +180,8 @@ SELECT
     ASSET_CODE,
     SHARES_HELD,
     COST_BASIS_IN_BRL,
-    DIV0(COST_BASIS_IN_BRL, SHARES_HELD) AS AVG_COST_PRICE
+    DIV0(COST_BASIS_IN_BRL, SHARES_HELD) AS AVG_COST_PRICE,
+    SOURCE_FILE,
+    SOURCE_SYSTEM,
+    {{dbt.current_timestamp()}} AS LOAD_TS
 FROM running_cost_basis

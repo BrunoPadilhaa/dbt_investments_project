@@ -6,6 +6,8 @@ SELECT
     SOURCE_FILE,
     SOURCE_SYSTEM
 FROM {{source('raw', 'raw_positions_equities_b3')}}
+-- subscription rights / receipts (e.g. XPML12, FLRY1, ITSA10) are not shares: no cost, no value
+WHERE NOT REGEXP_LIKE(ASSET_CODE, '^[A-Z]{4}(1|2|9|10|12|13|14|15)$')
 )
 
 SELECT

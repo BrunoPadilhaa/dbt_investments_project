@@ -2,23 +2,20 @@ version: 2
 
 models:
   - name: stg_transactions_xtb
-    description: "Cleaned Portuguese trades data"
+    description: "XTB (Portugal) stock purchases and sales. Only 'Stock purchase' and 'Stock sale' rows are kept and the 'Total' summary row is dropped. Shares and price are parsed from the free-text comment, and shares and amount are signed so purchases are positive and sales negative."
     columns:
       - name: transaction_id
-        description: "Unique identifier for each trade"
         tests:
           - unique
           - not_null
-    
+
   - name: stg_asset_prices
-    description: "Cleaned daily stock prices"
+    description: "Daily asset prices (open, high, low, close, adjusted close and volume) from Yahoo Finance, with asset codes and currencies upper-cased and trimmed"
     columns:
-      - name: asset_code
-        description: "Stock symbol"
+      - name: price_date
         tests:
           - not_null
-      - name: price_date
-        description: "Date of the stock price"
+      - name: asset_code
         tests:
           - not_null
     tests:
@@ -28,18 +25,15 @@ models:
             - price_date
 
   - name: stg_exchange_rates
-    description: "Cleaned daily exchange rates"
+    description: "Daily currency exchange rates, one row per currency pair and date"
     columns:
+      - name: rate_date
+        tests:
+          - not_null
       - name: currency_from
-        description: "Base currency being converted from"
         tests:
           - not_null
       - name: currency_to
-        description: "Target currency being converted to"
-        tests:
-          - not_null
-      - name: rate_date
-        description: "Date of the exchange rate"
         tests:
           - not_null
     tests:
@@ -50,57 +44,60 @@ models:
             - rate_date
 
   - name: stg_asset
-    description: "Cleaned asset information"
+    description: "List of assets held, built from XTB symbols (Portugal), B3 equity positions and B3 bond positions (Brazil)"
     columns:
       - name: asset_code
-        description: "Asset code"
         tests:
          - unique
          - not_null
 
   - name: stg_asset_mapping
-    description: "Cleaned asset mapping data"
+    description: "Manually maintained asset reference from the raw_asset_mapping seed, linking each asset code to its class and its ticker in the price source"
     columns:
       - name: asset_code
-        description: "Asset code"
         tests:
-          - unique 
+          - unique
           - not_null
 
   - name: stg_asset_details
-    description: "Cleaned asset details data"
+    description: "Descriptive asset information (name, sector, industry, exchange, currency) with text fields trimmed. Country is set from the exchange for LSE (England), GER (Germany) and AMS (Netherlands)"
     columns:
       - name: asset_code
-        description: "Asset code"
         tests:
-          - unique 
+          - unique
           - not_null
 
   - name: stg_trades_b3
-    description: "Cleaned B3 trades data"
+    description: "Running B3 position after each trade: one row per trade with the shares held, cost basis and average cost once that trade is applied. Combines B3 trades with the corporate action seed rows flagged APPLY_IN_MODEL = 'Y'. Asset codes have the fractional-market 'F' suffix removed and renamed tickers mapped to their current code. Cost basis uses average cost: purchases and adjustments add their amount, while sales and write-offs remove cost at the current average price."
     columns:
       - name: trade_key
-        description: "Unique identifier for each trade"
         tests:
           - unique
           - not_null
       - name: trade_date
-        description: "Date of the trade"
         tests:
           - not_null
       - name: asset_code
-        description: "Asset code"
         tests:
           - not_null
       - name: shares_held
-        description: "Number of shares held after the trade"
         tests:
           - not_null
       - name: cost_basis_in_brl
-        description: "Cost basis in BRL after the trade"
         tests:
           - not_null
       - name: avg_cost_price
-        description: "Average cost price per share in BRL after the trade"
         tests:
           - not_null
+
+  - name: stg_asset_conversion_mapping
+    description: "Maps old or renamed tickers to their current asset code (e.g. VVAR3 -> BHIA3)"
+
+  - name: stg_positions_equities_b3
+    description: "B3 equity position snapshot. Asset codes have the fractional-market 'F' suffix removed and renamed tickers mapped to their current code"
+
+  - name: stg_positions_bonds_b3
+    description: "B3 fixed income (bond) position snapshot"
+
+  - name: stg_transaction_type
+    description: "Standardized transaction types from the raw_transaction_type_seed, with flags for how each type affects the portfolio"
